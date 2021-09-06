@@ -224,7 +224,7 @@
                             @dblclick="changeHsCase(row, i, $event)"
                             readonly
                           >
-                          <span class="removeMark" @click.stop.prevent="deleteHsCase(row, i.content == hs_active[row.id], idx)">×</span>
+                          <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == hs_active[row.id], idx)">×</span>
                         </div>
                         <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addHsNewCase(row.id, $event)">
                       </div>
@@ -244,7 +244,7 @@
                                 @blur="changeAsCase(row, $event)" 
                                 @keyup.enter="changeAsCase(row, $event)"
                                 readonly>
-                            <span class="removeMark" @click.stop.prevent="deleteAsCase(row)">×</span>
+                            <span class="removeMark" @click.stop.prevent="deleteCase(row)">×</span>
                         </div>
                         <div class="mt-2" v-if="getImage(row)">
                           <div 
@@ -308,7 +308,7 @@
                                         @click="adClick"
                                         style="background: #fe5500; color: white;"
                                         readonly>
-                                    <span class="removeMark" @click.stop.prevent="deleteAdBox(row)">×</span>
+                                    <span class="removeMark" @click.stop.prevent="deleteCase(row)">×</span>
                                     <div class="dropList">
                                         <input type="text" placeholder="add name of new library" @change="addAdMain(row, $event)">
                                         <hr>

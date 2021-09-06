@@ -35,769 +35,747 @@ jQuery.getJSON("https://api.ipify.org?format=json", function(data) {
 var url = 'https://easydialog.org/wp-admin/admin-ajax.php'
 
 const app = new Vue({
-el: "#easyDialog",
-data(){
-  return {
-    isInsert: false,
-    isInsertStart: false,
-    isBuilt: false,
-    boxes: [],
-    scripts:[],
-    docs: [],
-    ad:[],
-    id: 1,
-    end: '',
-    text: '',
-    hs_active:{},
-    ad_active:{},
-    clicks: 0,
-    renderKey: 0    
-  }
-},
-computed:{
-  prev_row_id(){
-      return this.rows().length ? this.rows()[this.rows().length - 1].id : 0
-  } 
-},
-mounted(){
-  // jQuery(".focusElement")[0].focus();
-},
-updated(){
-  jQuery(".focusElement").length && ( jQuery(".focusElement")[0].focus() )
-},
-methods: {
-  reset () {
-      Object.assign(this.$data, this.$options.data());
+  el: "#easyDialog",
+  data(){
+    return {
+      isInsert: false,
+      isInsertStart: false,
+      isBuilt: false,
+      boxes: [],
+      scripts:[],
+      docs: [],
+      ad:[],
+      id: 1,
+      end: '',
+      text: '',
+      hs_active:{},
+      ad_active:{},
+      clicks: 0,
+      renderKey: 0    
+    }
+  },
+  computed:{
+    prev_row_id(){
+        return this.rows().length ? this.rows()[this.rows().length - 1].id : 0
+    } 
   },
 
-  box(id){
-    return this.boxes.find(i => i.id == id)
+  updated(){
+    jQuery(".focusElement").length && ( jQuery(".focusElement")[0].focus() )
   },
-  setPrevBox(prev_row_id){
-    console.log('setPrevBox')
+  methods: {
+    reset () {
+        Object.assign(this.$data, this.$options.data());
+    },
+
+    box(id){
+      return this.boxes.find(i => i.id == id)
+    },
+    setPrevBox(prev_row_id){
+      if(prev_row_id){
+          let prev_box = this.box(prev_row_id)
+          if(prev_box.action == 'hs'){
+              this.getCase(prev_box.cases, this.hs_active[prev_row_id]).next = this.id
+          }else if(prev_box.action == 'as'){
+              prev_box.cases[0].next = this.id
+          }else{
+            let ad_case = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] )
+            if(ad_case){
+                ad_case.next = this.id
+            }else{
+              prev_box.cases.push({
+                  content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
+                  next: this.id
+              })
+
+              if(prev_box.cases.length - 1 && ( prev_box.cases[0].content[0] == prev_box.cases[0].content[1] ) && ( prev_box.cases[0].next == 0 )){
+                prev_box.cases.shift()
+              } 
+            }
+          }
+      }
+    },
+    prevReset(id){
+      let box = this.box(this.rows().find(i => i.next == id).id)
+
+      if(box.action == 'hs'){
+          this.getCase(box.cases, this.hs_active[box.id]).next = 0
+      }else if(box.action == 'as'){
+          box.cases[0].next = 0
+      }else{
+          box.cases
+            .find(i => i.content[0] == this.ad_active[box.id][0] && i.content[1] == this.ad_active[box.id][1])
+            .next = 0
+      }
+    },
+    isPrev(id){
+      let cnt = 0
+      let boxes = this.boxes
+      boxes.forEach(function(box){
+        box.cases.forEach(function(item){
+          if(item.next == id) cnt++
+        })
+      })
+
+      return cnt;
+    },
+    insertRow(item){
+      if(item == 's'){
+        this.rows().length && ( this.isInsert = 's' )
+      }else if(item == 'n' || this.isInsert.id == item.id) {
+        this.isInsert = 0
+      }else{
+        this.isInsert = item
+      }
+    },
+    deleteBox(id){
+      if(Number(id)){
+          let list = this.box(id).cases.map( e => e.next)
+          if(!this.isPrev(id)){
+            let idx = this.boxes.findIndex(e => e.id == id)
+            this.boxes.splice(idx, 1)
+            while(id = list.pop()){
+              this.deleteBox(id)
+            }
+          }
+      }
+    },
+
+    rows(){
+      var box_id = 1;
+      var rows = [];
+      while(this.box(box_id)){
+          let box = this.box(box_id)
+          if(box.action == 'hs'){
+              box_id = this.getCase(box.cases, this.hs_active[box_id]).next
+          }else if(box.action == 'as'){
+              box_id = box.cases[0].next
+          }else if(box.action == 'ad'){
+              let ad_case = box.cases.find(i => i.content[0] == this.ad_active[box_id][0] && i.content[1] == this.ad_active[box_id][1] )
+              if(ad_case){
+                  box_id = ad_case.next
+              }else{
+                  box_id = 0
+              }
+          }else{
+              alert('Something is wrong in Data! Data will be formatted! ');
+              this.boxes = []
+              this.id = 1
+          }
+          rows.push({
+              id: box.id,
+              action: box.action,
+              next: box_id
+          })
+      }
+      return rows;
+    },
+
+    ases(){
+        let arr = this.rows().map(i => i.id)
+        return this.boxes.filter(i => i.action == 'as' && !arr.includes(i.id))
+    },
+    ad_mains(){
+      return this.ad.map( i => i.main)
+    },
+    ad_subs(main){
+        let arr = this.ad.find(element => element.main == main).sub
+        return arr.slice(1)
+    },
     
-    if(prev_row_id){
-        let prev_box = this.box(prev_row_id)
-        if(prev_box.action == 'hs'){
-            this.getCase(prev_box.cases, this.hs_active[prev_row_id]).next = this.id
-        }else if(prev_box.action == 'as'){
+    getCase(arr, val){
+      if(Array.isArray(val) && val.length == 2)
+      return arr.find(i => (i.content[0] == val[0] && (i.content[1] == val[1])))
+      return arr.find(i => i.content == val)
+    },
+    addHsNewBox(prev_row_id, e){
+      isChange = true
+      if(this.isInsert == 's'){
+        if(this.box(1).action == 'ad'){
+          this.ad_active[this.id] = this.ad_active[1]
+        }
+        this.box(1).id = this.id
+        this.boxes.push({
+            id: 1,
+            action: 'hs',
+            cases: [{
+                content: e.target.value,
+                next: this.id
+            }]
+        })
+        this.hs_active[1] = e.target.value
+        this.isInsert = 0
+      }else if(this.isInsert){
+        let prev_box = this.box(this.isInsert.id)
+        let next
+        if(prev_box.action == 'as'){
+          next = prev_box.cases[0].next
+        }else{
+          next = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] ).next
+        }
+        this.boxes.push({
+            id: this.id,
+            action: 'hs',
+            cases: [{
+                content: e.target.value,
+                next: next
+            }]
+        })
+        this.hs_active[this.id] = e.target.value
+
+        if(prev_box.action == 'as'){
             prev_box.cases[0].next = this.id
         }else{
           let ad_case = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] )
-          if(ad_case){
-              ad_case.next = this.id
-          }else{
-            prev_box.cases.push({
-                content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
-                next: this.id
-            })
-
-            if(prev_box.cases.length - 1 && ( prev_box.cases[0].content[0] == prev_box.cases[0].content[1] ) && ( prev_box.cases[0].next == 0 )){
-              prev_box.cases.shift()
-            } 
-          }
-        }
-    }
-  },
-  prevReset(id){
-    let box = this.box(this.rows().find(i => i.next == id).id)
-
-    if(box.action == 'hs'){
-        this.getCase(box.cases, this.hs_active[box.id]).next = 0
-    }else if(box.action == 'as'){
-        box.cases[0].next = 0
-    }else{
-        box.cases
-          .find(i => i.content[0] == this.ad_active[box.id][0] && i.content[1] == this.ad_active[box.id][1])
-          .next = 0
-    }
-  },
-  isPrev(id){
-    let cnt = 0
-    let boxes = this.boxes
-    boxes.forEach(function(box){
-      box.cases.forEach(function(item){
-        if(item.next == id) cnt++
-      })
-    })
-
-    return cnt;
-  },
-  insertRow(item){
-    if(item == 's'){
-      this.rows().length && ( this.isInsert = 's' )
-    }else if(item == 'n' || this.isInsert.id == item.id) {
-      this.isInsert = 0
-    }else{
-      this.isInsert = item
-    }
-  },
-  deleteBox(id){
-    if(Number(id)){
-        let list = this.box(id).cases.map( e => e.next)
-        if(!this.isPrev(id)){
-          let idx = this.boxes.findIndex(e => e.id == id)
-          this.boxes.splice(idx, 1)
-          while(id = list.pop()){
-            this.deleteBox(id)
-          }
-        }
-     }
-  },
-
-  rows(){
-    var box_id = 1;
-    var rows = [];
-    while(this.box(box_id)){
-        let box = this.box(box_id)
-        if(box.action == 'hs'){
-            box_id = this.getCase(box.cases, this.hs_active[box_id]).next
-        }else if(box.action == 'as'){
-            box_id = box.cases[0].next
-        }else if(box.action == 'ad'){
-            let ad_case = box.cases.find(i => i.content[0] == this.ad_active[box_id][0] && i.content[1] == this.ad_active[box_id][1] )
             if(ad_case){
-                box_id = ad_case.next
+                ad_case.next = this.id
             }else{
-                box_id = 0
+              this.setPrevBox(prev_box);
+              // prev_box.cases.push({
+              //     content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
+              //     next: this.id
+              // })
             }
-        }else{
-            alert('Something is wrong in Data! Data will be formatted! ');
-            this.boxes = []
-            this.id = 1
         }
-        rows.push({
-            id: box.id,
-            action: box.action,
-            next: box_id
+
+        this.isInsert = 0
+      }else{
+        this.boxes.push({
+            id: this.id,
+            action: 'hs',
+            cases: [{
+                content: e.target.value,
+                next: 0
+            }]
         })
-    }
-    return rows;
-  },
+        this.hs_active[this.id] = e.target.value
 
-  ases(){
-      let arr = this.rows().map(i => i.id)
-      return this.boxes.filter(i => i.action == 'as' && !arr.includes(i.id))
-  },
-  ad_mains(){
-    return this.ad.map( i => i.main)
-  },
-  ad_subs(main){
-      let arr = this.ad.find(element => element.main == main).sub
-      return arr.slice(1)
-  },
-  
-  getCase(arr, val){
-    return arr.find(i => i.content == val)
-  },
-  addHsNewBox(prev_row_id, e){
-    isChange = true
-    if(this.isInsert == 's'){
-      if(this.box(1).action == 'ad'){
-        this.ad_active[this.id] = this.ad_active[1]
+        this.setPrevBox(prev_row_id)
       }
-      this.box(1).id = this.id
-      this.boxes.push({
-          id: 1,
-          action: 'hs',
-          cases: [{
-              content: e.target.value,
-              next: this.id
-          }]
-      })
-      this.hs_active[1] = e.target.value
-      this.isInsert = 0
-    }else if(this.isInsert){
-      let prev_box = this.box(this.isInsert.id)
-      let next
-      if(prev_box.action == 'as'){
-        next = prev_box.cases[0].next
-      }else{
-        next = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] ).next
-      }
-      this.boxes.push({
-          id: this.id,
-          action: 'hs',
-          cases: [{
-              content: e.target.value,
-              next: next
-          }]
-      })
-      this.hs_active[this.id] = e.target.value
-
-      if(prev_box.action == 'as'){
-          prev_box.cases[0].next = this.id
-      }else{
-        let ad_case = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] )
-          if(ad_case){
-              ad_case.next = this.id
-          }else{
-            this.setPrevBox(prev_box);
-            // prev_box.cases.push({
-            //     content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
-            //     next: this.id
-            // })
-          }
-      }
-
-      this.isInsert = 0
-    }else{
-      this.boxes.push({
-          id: this.id,
-          action: 'hs',
-          cases: [{
+      this.id++
+    },
+    addHsNewCase(id, e){
+      if(e.target.value){
+        isChange = true
+          var box = this.box(id)
+          box.cases.push({
               content: e.target.value,
               next: 0
-          }]
-      })
-      this.hs_active[this.id] = e.target.value
-
-      this.setPrevBox(prev_row_id)
-    }
-    this.id++
-  },
-  addHsNewCase(id, e){
-    if(e.target.value){
-      isChange = true
-        var box = this.box(id)
-        box.cases.push({
-            content: e.target.value,
-            next: 0
-        })
-        this.hs_active[id] = e.target.value
-    }
-  },
-  activeHsCase(row, i, e){
-      if(this.hs_active[row.id] != i.content){
-          this.hs_active[row.id] = i.content
-        this.renderKey++
+          })
+          this.hs_active[id] = e.target.value
       }
-  },
-  deleteHsCase(row, flag, idx){
-    if(confirm("Delete?")){
-      isChange = true
-      if(this.box(row.id).cases.length - 1){
-        let next = this.box(row.id).cases[idx].next
-        this.box(row.id).cases.splice(idx, 1)
-        if(flag){
-          this.hs_active[row.id] = this.box(row.id).cases[0].content
+    },
+    activeHsCase(row, i, e){
+        if(this.hs_active[row.id] != i.content){
+            this.hs_active[row.id] = i.content
+          this.renderKey++
         }
-        this.deleteBox(next)
-      }else{
-        if(row.id == 1){
-          this.boxes = []
-          this.id = 1
-        }else{
-          this.prevReset(row.id)
-          this.deleteBox(row.id)
-        }
-      }
-    }
-  },
-  changeHsCase(row, i ,e){
+    },
     
-    // e.target.readOnly = true
-    let el = jQuery('<textarea rows="3">' + e.target.value + '</textarea>')
-    el.css({position: 'absolute', top: '105%', left: 0, background: '#FFF', width: '100%', color: '#000', zIndex: 2})
-    el.on('change blur', function(e){
-      isChange = true
-      i.content = jQuery(this).val()
-      app.hs_active[row.id] = i.content
-      jQuery(this).remove()
-    })
-    el.on('keypress', function(event) {
-        if (event.keyCode == 13) {
-            event.preventDefault();
-            jQuery(this).trigger('change')
-        }
-    });
-    jQuery(e.target).after(el)
-    el.focus()
-  },
-  addAsNewBox(prev_row_id, e){
-    isChange = true
-    if(this.isInsert == 's'){
-      if(this.box(1).action == 'hs'){
-        this.hs_active[this.id] = this.hs_active[1]
-      }
-      if(this.box(1).action == 'ad'){
-        this.ad_active[this.id] = this.ad_active[1]
-      }
-      this.box(1).id = this.id
-      this.boxes.push({
-          id: 1,
-          action: 'as',
-          cases: [{
-              content: e.target.value,
-              next: this.id
-          }]
-      })
-      this.isInsert = 0
-    }else if(this.isInsert){
-      let prev_box = this.box(this.isInsert.id)
-      let next
-      if(prev_box.action == 'hs'){
-        next = prev_box.cases.find(i => i.content == this.hs_active[prev_box.id] ).next
-      }else{
-        next = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] ).next
-      }
-      this.boxes.push({
-          id: this.id,
-          action: 'as',
-          cases: [{
-              content: e.target.value,
-              next: next
-          }]
-      })
-      this.hs_active[this.id] = e.target.value
-
-      if(prev_box.action == 'hs'){
-        prev_box.cases.find(i => i.content == this.hs_active[prev_box.id] ).next = this.id
-        // prev_box.cases[0].next = this.id
-      }else{
-        let ad_case = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] )
-          if(ad_case){
-              ad_case.next = this.id
-          }else{
-            prev_box.cases.push({
-                content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
-                next: this.id
-            })
-          }
-      }
-
-      this.isInsert = 0
-    }else{
-      this.boxes.push({
-          id: this.id,
-          action: 'as',
-          cases: [{
-              content: e.target.value,
-              next: 0
-          }]
-      })
-      this.setPrevBox(prev_row_id)
-    }
-    this.id++
-  },
-  updateAsCase(row, e){
-    let el = jQuery('<textarea rows="3">' + e.target.value + '</textarea>')
-    el.css({position: 'absolute', top: '105%', left: 0, background: '#FFF', width: '100%', color: '#000', zIndex: 2})
-    el.on('change blur', function(e){
-      isChange = true
-      app.box(row.id).cases[0].content = jQuery(this).val()
-      jQuery(this).remove()
-    })
-    el.on('keypress', function(event) {
-        if (event.keyCode == 13) {
-            event.preventDefault();
-            jQuery(this).trigger('change')
-        }
-    });
-    jQuery(e.target).after(el)
-    el.focus()
-  },
-  changeAsCase(row, e){
-    isChange = true
-    this.box(row.id).cases[0].content = e.target.value
-  },
-  deleteAdBox(row){
-    if(confirm("Delete?")){
-      isChange = true
-      if(row.id == 1){
+    deleteCase(row, flag, idx){
+      if(!confirm("Really Delete?")) return
+      
+      let {id, action, next} = row
+      
+      if(id == 1){
         this.boxes = []
         this.id = 1
-      }else{
-        let next = 0
-        if(this.box(row.id).cases.length > 1){
-          next = this.box(row.id).cases[1].next
-        }else{
-          next = this.box(row.id).cases[0].next
-        }
-        let box = this.box(this.rows().find(i => i.next == row.id).id)
+      }else if(action=='as' && confirm("Delete Only This Step?")){
+          let box = this.box(this.rows().find(i => i.next == id).id)
 
-        if(box.action == 'hs'){
+          if(box.action == 'hs'){
             this.getCase(box.cases, this.hs_active[box.id]).next = next
-        }else if(box.action == 'as'){
-            box.cases[0].next = next
-        }
-
-        let idx = this.boxes.findIndex(e => e.id == row.id)
-        this.boxes.splice(idx, 1)
-      }
-    }
-  },
-  deleteCase(row){
-    if(confirm("Really Delete?")){
-      isChange = true
-      if(confirm("Delete Only This Box?")){
-
-      }else{
-        if(row.id == 1){
-          this.boxes = []
-          this.id = 1
-        }else{
-          this.prevReset(row.id)
-          this.deleteBox(row.id)
-        }
-      }
-    }
-  },
-  selectAsBox(i, e){
-    let prev_row_id = this.prev_row_id;
-    let prev_box = this.box(prev_row_id)
-    if(prev_box.action == 'hs'){
-      this.getCase(prev_box.cases, this.hs_active[prev_row_id]).next = i.id
-    }else{
-      isChange = true
-      prev_box.cases.push({
-        content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
-        next: i.id
-      })
-    }
-  },
-  adClick(e){
-    e.stopPropagation()
-    jQuery(".dropList").css( 'visibility', 'hidden')
-    jQuery(e.currentTarget).parent().find(".dropList").css('visibility', 'visible')
-  },
-  addAdMain(row, e){
-    this.ad.push({
-      main: e.target.value,
-      sub:[e.target.value]
-    })
-    this.activeAdMain(row, e)
-  },
-  activeAdMain(row, e){
-    if(row){
-      if(e.target.value != this.ad_active[row.id][0]){
-        if(this.box(row.id)['cases'].length > 1){
-          let next = this.box(row.id)['cases'][1].next
-          this.box(row.id).cases = []
-          this.box(row.id).cases[0] = {
-            'content': [e.target.value, e.target.value],
-            'next': next
+          }else if(box.action == 'ad'){
+            this.getCase(box.cases, this.ad_active[box.id]).next = next
           }
-        }else{
-          this.box(row.id)['cases'][0]['content'] = [e.target.value, e.target.value]
+
+          let idx = this.boxes.findIndex(e => e.id == id)
+          this.boxes.splice(idx, 1)
+      }else if(action=='hs' && this.box(id).cases.length - 1){
+        let next = this.box(id).cases[idx].next
+        this.box(id).cases.splice(idx, 1)
+        if(flag){
+          this.hs_active[id] = this.box(id).cases[0].content
         }
-        this.ad_active[row.id] = [e.target.value, e.target.value]
+        this.deleteBox(next)
+      }else if(action=='ad'){
+          let next = 0
+          if(this.box(id).cases.length > 1){
+            next = this.box(id).cases[1].next
+          }else{
+            next = this.box(id).cases[0].next
+          }
+          let box = this.box(this.rows().find(i => i.next == id).id)
+
+          if(box.action == 'hs'){
+              this.getCase(box.cases, this.hs_active[box.id]).next = next
+          }else if(box.action == 'as'){
+              box.cases[0].next = next
+          }
+
+          let idx = this.boxes.findIndex(e => e.id == id)
+          this.boxes.splice(idx, 1)
+      }else{
+        this.prevReset(id)
+        this.deleteBox(id)
       }
-      // active = jQuery(e.target).parents('.dropList').find('.adItem.active input').val();
-      // if(active && e.target.value != active){
-      //   if(confirm("Are you delete " + active)){
-      //     this.deleteAdMain(active)
-      //     this.activeAdMain(false, e)
-      //   }
-      // }else{
-      //   this.ad_active[row.id] = [e.target.value, e.target.value]
-      // }
-    }else{
+    },
+    
+    changeHsCase(row, i ,e){
+      
+      // e.target.readOnly = true
+      let el = jQuery('<textarea rows="3">' + e.target.value + '</textarea>')
+      el.css({position: 'absolute', top: '105%', left: 0, background: '#FFF', width: '100%', color: '#000', zIndex: 2})
+      el.on('change blur', function(e){
+        isChange = true
+        i.content = jQuery(this).val()
+        app.hs_active[row.id] = i.content
+        jQuery(this).remove()
+      })
+      el.on('keypress', function(event) {
+          if (event.keyCode == 13) {
+              event.preventDefault();
+              jQuery(this).trigger('change')
+          }
+      });
+      jQuery(e.target).after(el)
+      el.focus()
+    },
+    addAsNewBox(prev_row_id, e){
       isChange = true
       if(this.isInsert == 's'){
         if(this.box(1).action == 'hs'){
           this.hs_active[this.id] = this.hs_active[1]
         }
+        if(this.box(1).action == 'ad'){
+          this.ad_active[this.id] = this.ad_active[1]
+        }
         this.box(1).id = this.id
         this.boxes.push({
             id: 1,
-            action: 'ad',
+            action: 'as',
             cases: [{
-              'content': [e.target.value, e.target.value],
-              'next': this.id
+                content: e.target.value,
+                next: this.id
             }]
         })
-        this.ad_active[1] = [e.target.value, e.target.value]
         this.isInsert = 0
       }else if(this.isInsert){
         let prev_box = this.box(this.isInsert.id)
-        if(prev_box.action == 'as'){
-            next = prev_box.cases[0].next
-        }else if(prev_box.action == 'hs'){
-            next = this.getCase(prev_box.cases, this.hs_active[this.isInsert.id]).next
+        let next
+        if(prev_box.action == 'hs'){
+          next = prev_box.cases.find(i => i.content == this.hs_active[prev_box.id] ).next
+        }else{
+          next = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] ).next
         }
         this.boxes.push({
             id: this.id,
-            action: 'ad',
+            action: 'as',
             cases: [{
-              'content': [e.target.value, e.target.value],
-              'next': next
+                content: e.target.value,
+                next: next
             }]
         })
-        this.ad_active[this.id] = [e.target.value, e.target.value]
-        if(prev_box.action == 'as'){
-            prev_box.cases[0].next = this.id
-        }else if(prev_box.action == 'hs'){
-            this.getCase(prev_box.cases, this.hs_active[this.isInsert.id]).next = this.id
+        this.hs_active[this.id] = e.target.value
+
+        if(prev_box.action == 'hs'){
+          prev_box.cases.find(i => i.content == this.hs_active[prev_box.id] ).next = this.id
+          // prev_box.cases[0].next = this.id
+        }else{
+          let ad_case = prev_box.cases.find(i => i.content[0] == this.ad_active[prev_box.id][0] && i.content[1] == this.ad_active[prev_box.id][1] )
+            if(ad_case){
+                ad_case.next = this.id
+            }else{
+              prev_box.cases.push({
+                  content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
+                  next: this.id
+              })
+            }
         }
+
         this.isInsert = 0
       }else{
         this.boxes.push({
             id: this.id,
-            action: 'ad',
+            action: 'as',
             cases: [{
-              'content': [e.target.value, e.target.value],
-              'next': 0
+                content: e.target.value,
+                next: 0
             }]
         })
-        this.ad_active[this.id] = [e.target.value, e.target.value]
-
-        this.box(this.prev_row_id).action != 'ad' && this.setPrevBox(this.prev_row_id)
+        this.setPrevBox(prev_row_id)
       }
       this.id++
-    }
-    this.renderKey++
-  },
-  addAdSub(row, e){
-    isChange = true
-      this.ad
-          .find(element => element.main == this.ad_active[row.id][0])
-          .sub.push(e.target.value)
-      this.activeAdSub(row, e)
-  },
-  activeAdSub(row, e){
-    isChange = true
-      this.ad_active[row.id][1] = e.target.value
-      this.renderKey++
-  },
-  isActiveAdMain(i, id) {
-      let arr = this.box(id).cases.map( item => item.content[0] )
-      return arr.includes(i)
-  },
-  isActiveAdSub(i, id) {
-    let arr = this.box(id).cases
-        .filter( item => this.ad_active[id][0] == item.content[0] )
-        .map( item => item.content[1])
-    return arr.includes(i)
-  },
-  deleteAdMain(main){
-    let r = confirm('Really Delete?')
-    if(!r) return
-
-    isChange = true
-
-    this.ad = this.ad.filter( e => e.main != main)
-
-    let i = this.boxes.length
-    while(i--){
-      let box = this.boxes[i]
-      if(box.action == "ad"){
-        let j = box.cases.length
-        while(j--){
-          if(box.cases[j].content[0] == main){
-            let next = box.cases[j].next
-            box.cases.splice(j, 1)
-            this.deleteBox(next)
+    },
+    updateAsCase(row, e){
+      let el = jQuery('<textarea rows="3">' + e.target.value + '</textarea>')
+      el.css({position: 'absolute', top: '105%', left: 0, background: '#FFF', width: '100%', color: '#000', zIndex: 2})
+      el.on('change blur', function(e){
+        isChange = true
+        app.box(row.id).cases[0].content = jQuery(this).val()
+        jQuery(this).remove()
+      })
+      el.on('keypress', function(event) {
+          if (event.keyCode == 13) {
+              event.preventDefault();
+              jQuery(this).trigger('change')
           }
-        }
-        if(!box.cases.length){
-          if(box.id != 1){
-            let boxes = this.boxes
-            let k = boxes.length
-            while(k--){
-              let b = boxes[k]
-              let l = b.cases.length
-              while(l--){
-                if(b.cases[l].next == box.id) b.cases[l].next = 0
-              }
-            }
-            this.boxes.splice(i, 1)
-          }else{
-            this.boxes = []
-            this.id = 1
-          }
-        }else{
-          this.ad_active[box.id] = box.cases[0].content
-        }
-      }
-    }
-  },
-  deleteAdSub(main, sub){
-      let r = confirm('Really Delete?');
-    if(!r) return
-    
-    isChange = true
-
-      this.ad.find( x => x.main == main).sub.remove(sub)
-
-    let i = this.boxes.length
-    while(i--){
-      let box = this.boxes[i]
-      if(box.action == "ad"){
-        let j = box.cases.length
-        while(j--){
-          if(box.cases[j].content[0] == main && box.cases[j].content[1] == sub){
-            let next = box.cases[j].next
-            box.cases.splice(j, 1)
-            this.deleteBox(next)
-          }
-        }
-        if(!box.cases.length){
-          if(box.id != 1){
-            let boxes = this.boxes
-            let k = boxes.length
-            while(k--){
-              let b = boxes[k]
-              let l = b.cases.length
-              while(l--){
-                if(b.cases[l].next == box.id) b.cases[l].next = 0
-              }
-            }
-            this.boxes.splice(i, 1)
-          }else{
-            this.boxes = []
-            this.id = 1
-          }
-        }else{
-          this.ad_active[box.id] = box.cases[0].content
-        }
-      }
-    }
-  },
-  getImage(row){
-      if(doc = this.docs.find( i => i.caseid == row.id))
-      return doc.data
-      return null
-  },
+      });
+      jQuery(e.target).after(el)
+      el.focus()
+    },
+    changeAsCase(row, e){
+      isChange = true
+      this.box(row.id).cases[0].content = e.target.value
+    },
   
-  updatePhotoPreview(row, event) {
-    isChange = true
     
-      if(event.target.files[0].size > 1000000){
-          alert('File Size should smaller than 1M')
-          return false;
+    selectAsBox(i, e){
+      let prev_row_id = this.prev_row_id;
+      let prev_box = this.box(prev_row_id)
+      if(prev_box.action == 'hs'){
+        this.getCase(prev_box.cases, this.hs_active[prev_row_id]).next = i.id
+      }else{
+        isChange = true
+        prev_box.cases.push({
+          content: [this.ad_active[prev_box.id][0], this.ad_active[prev_box.id][1]],
+          next: i.id
+        })
       }
-
-      let filename = event.target.files[0].name
-
-    if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
-      alert('Correct File Name')
-      return false
-    }
-    
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        // this.box(row.id).cases[0].docs = e.target.result;
-        doc = this.docs.find( i => i.caseid == row.id)
-        if(doc){
-          doc.data = e.target.result
-        doc.doc_name = filename
-        }else{
-          this.docs.push({
-            'caseid': row.id,
-            'doc_name': filename,
-            'data': e.target.result
-          })
+    },
+    adClick(e){
+      e.stopPropagation()
+      jQuery(".dropList").css( 'visibility', 'hidden')
+      jQuery(e.currentTarget).parent().find(".dropList").css('visibility', 'visible')
+    },
+    addAdMain(row, e){
+      this.ad.push({
+        main: e.target.value,
+        sub:[e.target.value]
+      })
+      this.activeAdMain(row, e)
+    },
+    activeAdMain(row, e){
+      if(row){
+        if(e.target.value != this.ad_active[row.id][0]){
+          if(this.box(row.id)['cases'].length > 1){
+            let next = this.box(row.id)['cases'][1].next
+            this.box(row.id).cases = []
+            this.box(row.id).cases[0] = {
+              'content': [e.target.value, e.target.value],
+              'next': next
+            }
+          }else{
+            this.box(row.id)['cases'][0]['content'] = [e.target.value, e.target.value]
+          }
+          this.ad_active[row.id] = [e.target.value, e.target.value]
         }
-        
-        this.renderKey ++ ;
-    };
+      }else{
+        isChange = true
+        if(this.isInsert == 's'){
+          if(this.box(1).action == 'hs'){
+            this.hs_active[this.id] = this.hs_active[1]
+          }
+          this.box(1).id = this.id
+          this.boxes.push({
+              id: 1,
+              action: 'ad',
+              cases: [{
+                'content': [e.target.value, e.target.value],
+                'next': this.id
+              }]
+          })
+          this.ad_active[1] = [e.target.value, e.target.value]
+          this.isInsert = 0
+        }else if(this.isInsert){
+          let prev_box = this.box(this.isInsert.id)
+          if(prev_box.action == 'as'){
+              next = prev_box.cases[0].next
+          }else if(prev_box.action == 'hs'){
+              next = this.getCase(prev_box.cases, this.hs_active[this.isInsert.id]).next
+          }
+          this.boxes.push({
+              id: this.id,
+              action: 'ad',
+              cases: [{
+                'content': [e.target.value, e.target.value],
+                'next': next
+              }]
+          })
+          this.ad_active[this.id] = [e.target.value, e.target.value]
+          if(prev_box.action == 'as'){
+              prev_box.cases[0].next = this.id
+          }else if(prev_box.action == 'hs'){
+              this.getCase(prev_box.cases, this.hs_active[this.isInsert.id]).next = this.id
+          }
+          this.isInsert = 0
+        }else{
+          this.boxes.push({
+              id: this.id,
+              action: 'ad',
+              cases: [{
+                'content': [e.target.value, e.target.value],
+                'next': 0
+              }]
+          })
+          this.ad_active[this.id] = [e.target.value, e.target.value]
 
-    reader.readAsDataURL(event.target.files[0]);
-  },
-  selectNewPhoto(e){
-      e.target.previousElementSibling.click()
-  },
-  deletePhoto(row){
-    isChange = true
-    let i = this.docs.findIndex( i => i.caseid == row.id) 
-    this.docs[i].data = null
-    this.docs[i].doc_name = null
-    this.renderKey ++
-  },
-  getScript(row){
-      if(script = this.scripts.find( i => i.caseid == row.id))
-      return script.script_name
-      return false
-  },
-  updateScript(row, event) {
-    isChange = true
-      if(event.target.files[0].size > 100000){
-          alert('File Size should smaller than 100KB')
-          return false;
+          this.box(this.prev_row_id).action != 'ad' && this.setPrevBox(this.prev_row_id)
+        }
+        this.id++
       }
-      let filename = event.target.files[0].name
+      this.renderKey++
+    },
+    addAdSub(row, e){
+      isChange = true
+        this.ad
+            .find(element => element.main == this.ad_active[row.id][0])
+            .sub.push(e.target.value)
+        this.activeAdSub(row, e)
+    },
+    activeAdSub(row, e){
+      isChange = true
+        this.ad_active[row.id][1] = e.target.value
+        this.renderKey++
+    },
+    isActiveAdMain(i, id) {
+        let arr = this.box(id).cases.map( item => item.content[0] )
+        return arr.includes(i)
+    },
+    isActiveAdSub(i, id) {
+      let arr = this.box(id).cases
+          .filter( item => this.ad_active[id][0] == item.content[0] )
+          .map( item => item.content[1])
+      return arr.includes(i)
+    },
+    deleteAdMain(main){
+      let r = confirm('Really Delete?')
+      if(!r) return
 
-    if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
-      alert('Correct File Name')
-      return false
-    }
+      isChange = true
+
+      this.ad = this.ad.filter( e => e.main != main)
+
+      let i = this.boxes.length
+      while(i--){
+        let box = this.boxes[i]
+        if(box.action == "ad"){
+          let j = box.cases.length
+          while(j--){
+            if(box.cases[j].content[0] == main){
+              let next = box.cases[j].next
+              box.cases.splice(j, 1)
+              this.deleteBox(next)
+            }
+          }
+          if(!box.cases.length){
+            if(box.id != 1){
+              let boxes = this.boxes
+              let k = boxes.length
+              while(k--){
+                let b = boxes[k]
+                let l = b.cases.length
+                while(l--){
+                  if(b.cases[l].next == box.id) b.cases[l].next = 0
+                }
+              }
+              this.boxes.splice(i, 1)
+            }else{
+              this.boxes = []
+              this.id = 1
+            }
+          }else{
+            this.ad_active[box.id] = box.cases[0].content
+          }
+        }
+      }
+    },
+    deleteAdSub(main, sub){
+        let r = confirm('Really Delete?');
+      if(!r) return
+      
+      isChange = true
+
+        this.ad.find( x => x.main == main).sub.remove(sub)
+
+      let i = this.boxes.length
+      while(i--){
+        let box = this.boxes[i]
+        if(box.action == "ad"){
+          let j = box.cases.length
+          while(j--){
+            if(box.cases[j].content[0] == main && box.cases[j].content[1] == sub){
+              let next = box.cases[j].next
+              box.cases.splice(j, 1)
+              this.deleteBox(next)
+            }
+          }
+          if(!box.cases.length){
+            if(box.id != 1){
+              let boxes = this.boxes
+              let k = boxes.length
+              while(k--){
+                let b = boxes[k]
+                let l = b.cases.length
+                while(l--){
+                  if(b.cases[l].next == box.id) b.cases[l].next = 0
+                }
+              }
+              this.boxes.splice(i, 1)
+            }else{
+              this.boxes = []
+              this.id = 1
+            }
+          }else{
+            this.ad_active[box.id] = box.cases[0].content
+          }
+        }
+      }
+    },
+    getImage(row){
+        if(doc = this.docs.find( i => i.caseid == row.id))
+        return doc.data
+        return null
+    },
+    
+    updatePhotoPreview(row, event) {
+      isChange = true
+      
+        if(event.target.files[0].size > 1000000){
+            alert('File Size should smaller than 1M')
+            return false;
+        }
+
+        let filename = event.target.files[0].name
+
+      if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
+        alert('Correct File Name')
+        return false
+      }
+      
       const reader = new FileReader();
 
       reader.onload = (e) => {
           // this.box(row.id).cases[0].docs = e.target.result;
-          script = this.scripts.find( i => i.caseid == row.id)
-          if(script){
-              script.data = e.target.result
-                script.script_name = filename
+          doc = this.docs.find( i => i.caseid == row.id)
+          if(doc){
+            doc.data = e.target.result
+          doc.doc_name = filename
           }else{
-              this.scripts.push({
-                'caseid': row.id,
-                'script_name': filename,
-                'data': e.target.result
+            this.docs.push({
+              'caseid': row.id,
+              'doc_name': filename,
+              'data': e.target.result
             })
           }
           
           this.renderKey ++ ;
       };
-      // reader.readAsDataURL(event.target.files[0]);
-      reader.readAsText(event.target.files[0]);
-  },
-  selectNewScript(e){
-      e.target.previousElementSibling.click()
-  },
-  deleteScript(row){
-    isChange = true
-    let i = this.scripts.findIndex( i => i.caseid == row.id) 
-    this.scripts[i].data = null
-    this.scripts[i].script_name = null
-    this.renderKey ++
-  },
-  // updateScript(event){
-  //   isChange = true
-  //   if(event.target.files[0].size > 1000000){
-  //     alert('File Size should smaller than 1M')
-  //     return false
-  //   }
-  //   let filename = event.target.files[0].name
-  //   const reader = new FileReader()
-  //   reader.onload = (e) => {
-  //     this.script = {
-  //       script_name: filename,
-  //       data: e.target.result
-  //     }
-  //   }
 
-  //   reader.readAsDataURL(event.target.files[0]);
-  // },
-  // removeScript(){
-  //   isChange = true
-  //   this.script = null
-  //   this.renderKey ++
-  // },
-  setBox(data){
-      this.boxes = data.boxes
-    this.hs_active = data.hs_active ? data.hs_active : {}
-    this.ad_active = data.ad_active ? data.ad_active : {}
-    this.docs = data.docs? data.docs : []
-    this.ad = data.ad ? data.ad : []
-    this.id = data.id
-    this.renderKey++
-  },
-  processBoxes(){
-      this.boxes.map( box => {
-        if(box.action == "ad"){
-          if(!box.cases.length){
-            box.cases.push({
-              content: this.ad_active[box.id],
-              next: 0
-          })
+      reader.readAsDataURL(event.target.files[0]);
+    },
+    selectNewPhoto(e){
+        e.target.previousElementSibling.click()
+    },
+    deletePhoto(row){
+      isChange = true
+      let i = this.docs.findIndex( i => i.caseid == row.id) 
+      this.docs[i].data = null
+      this.docs[i].doc_name = null
+      this.renderKey ++
+    },
+    getScript(row){
+        if(script = this.scripts.find( i => i.caseid == row.id))
+        return script.script_name
+        return false
+    },
+    updateScript(row, event) {
+      isChange = true
+        if(event.target.files[0].size > 100000){
+            alert('File Size should smaller than 100KB')
+            return false;
         }
+        let filename = event.target.files[0].name
+
+      if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
+        alert('Correct File Name')
+        return false
       }
-    });
-  }
-},
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            // this.box(row.id).cases[0].docs = e.target.result;
+            script = this.scripts.find( i => i.caseid == row.id)
+            if(script){
+                script.data = e.target.result
+                  script.script_name = filename
+            }else{
+                this.scripts.push({
+                  'caseid': row.id,
+                  'script_name': filename,
+                  'data': e.target.result
+              })
+            }
+            
+            this.renderKey ++ ;
+        };
+        // reader.readAsDataURL(event.target.files[0]);
+        reader.readAsText(event.target.files[0]);
+    },
+    selectNewScript(e){
+        e.target.previousElementSibling.click()
+    },
+    deleteScript(row){
+      isChange = true
+      let i = this.scripts.findIndex( i => i.caseid == row.id) 
+      this.scripts[i].data = null
+      this.scripts[i].script_name = null
+      this.renderKey ++
+    },
+    // updateScript(event){
+    //   isChange = true
+    //   if(event.target.files[0].size > 1000000){
+    //     alert('File Size should smaller than 1M')
+    //     return false
+    //   }
+    //   let filename = event.target.files[0].name
+    //   const reader = new FileReader()
+    //   reader.onload = (e) => {
+    //     this.script = {
+    //       script_name: filename,
+    //       data: e.target.result
+    //     }
+    //   }
+
+    //   reader.readAsDataURL(event.target.files[0]);
+    // },
+    // removeScript(){
+    //   isChange = true
+    //   this.script = null
+    //   this.renderKey ++
+    // },
+    setBox(data){
+        this.boxes = data.boxes
+      this.hs_active = data.hs_active ? data.hs_active : {}
+      this.ad_active = data.ad_active ? data.ad_active : {}
+      this.docs = data.docs? data.docs : []
+      this.ad = data.ad ? data.ad : []
+      this.id = data.id
+      this.renderKey++
+    },
+    processBoxes(){
+        this.boxes.map( box => {
+          if(box.action == "ad"){
+            if(!box.cases.length){
+              box.cases.push({
+                content: this.ad_active[box.id],
+                next: 0
+            })
+          }
+        }
+      });
+    }
+  },
 });
 
 jQuery(document).click(function (e) {
