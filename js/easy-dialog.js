@@ -47,7 +47,6 @@ const app = new Vue({
       docs: [],
       ad:[],
       id: 1,
-      end: '',
       text: '',
       activeCases:{},
       clicks: 0,
@@ -71,6 +70,7 @@ const app = new Vue({
     box(id){
       return this.boxes.find(i => i.id == id)
     },
+
     setPrevBox(prev_row_id){
       if(prev_row_id){
           let prev_box = this.box(prev_row_id)
@@ -95,6 +95,7 @@ const app = new Vue({
           }
       }
     },
+
     prevReset(id){
       let box = this.box(this.rows().find(i => i.next == id).id)
 
@@ -108,12 +109,13 @@ const app = new Vue({
             .next = 0
       }
     },
+    
     isPrev(id){
       let cnt = 0
       let boxes = this.boxes
-      boxes.forEach(function(box){
-        box.cases.forEach(function(item){
-          if(item.next == id) cnt++
+      boxes.forEach(box => {
+        box.cases.forEach( item => {
+          (item.next == id) && cnt++
         })
       })
 
@@ -124,22 +126,19 @@ const app = new Vue({
       this.insert === val ? 
         this.insert = -1 : ( this.boxes.length && (this.insert = val))
     },
+
     deleteBox(id){
-      if(Number(id)){
+      if(Number(id) && (!this.isPrev(id))){
           let list = this.box(id).cases.map( e => e.next)
-          if(!this.isPrev(id)){
-            let idx = this.boxes.findIndex(e => e.id == id)
-            this.boxes.splice(idx, 1)
-            while(id = list.pop()){
-              this.deleteBox(id)
-            }
-          }
+          let idx = this.boxes.findIndex(e => e.id == id)
+          this.boxes.splice(idx, 1)
+          list.forEach(id => this.deleteBox(id))
       }
     },
 
     rows(){
-      var box_id = 1;
-      var rows = [];
+      let box_id = 1;
+      let rows = [];
       while(this.box(box_id)){
           let box = this.box(box_id)
           if(box.action == 'hs'){
@@ -171,9 +170,11 @@ const app = new Vue({
         let arr = this.rows().map(i => i.id)
         return this.boxes.filter(i => i.action == 'as' && !arr.includes(i.id))
     },
+
     ad_mains(){
       return this.ad.map( i => i.main)
     },
+
     ad_subs(main){
         let arr = this.ad.find(element => element.main == main).sub
         return arr.slice(1)
@@ -184,6 +185,7 @@ const app = new Vue({
       return arr.find(i => (i.content[0] == val[0] && (i.content[1] == val[1])))
       return arr.find(i => i.content == val)
     },
+
     addNewBox(action, prev_row_id, e){
       isChange = true
       if(this.insert == 0){
@@ -194,7 +196,7 @@ const app = new Vue({
             action: action,
             cases: [{ content: e.target.value, next: this.id}]
         });
-        
+
         (['hs', 'ad'].includes(action)) && (this.activeCases[1] = e.target.value)
       }else if(this.insert != -1){
         let prev_box = this.box(this.insert)
@@ -243,75 +245,10 @@ const app = new Vue({
       this.insert = -1
       this.id++
     },
-    addAsNewBox(prev_row_id, e){
-      isChange = true
-      if(this.isInsert == 's'){
-        if(this.box(1).action == 'hs'){
-          this.activeCases[this.id] = this.activeCases[1]
-        }
-        if(this.box(1).action == 'ad'){
-          this.activeCases[this.id] = this.activeCases[1]
-        }
-        this.box(1).id = this.id
-        this.boxes.push({
-            id: 1,
-            action: 'as',
-            cases: [{
-                content: e.target.value,
-                next: this.id
-            }]
-        })
-        this.isInsert = 0
-      }else if(this.isInsert){
-        let prev_box = this.box(this.isInsert.id)
-        let next
-        if(prev_box.action == 'hs'){
-          next = prev_box.cases.find(i => i.content == this.activeCases[prev_box.id] ).next
-        }else{
-          next = prev_box.cases.find(i => i.content[0] == this.activeCases[prev_box.id][0] && i.content[1] == this.activeCases[prev_box.id][1] ).next
-        }
-        this.boxes.push({
-            id: this.id,
-            action: 'as',
-            cases: [{
-                content: e.target.value,
-                next: next
-            }]
-        })
-        this.activeCases[this.id] = e.target.value
-
-        if(prev_box.action == 'hs'){
-          prev_box.cases.find(i => i.content == this.activeCases[prev_box.id] ).next = this.id
-          // prev_box.cases[0].next = this.id
-        }else{
-          let ad_case = prev_box.cases.find(i => i.content[0] == this.activeCases[prev_box.id][0] && i.content[1] == this.activeCases[prev_box.id][1] )
-            if(ad_case){
-                ad_case.next = this.id
-            }else{
-              prev_box.cases.push({
-                  content: [this.activeCases[prev_box.id][0], this.activeCases[prev_box.id][1]],
-                  next: this.id
-              })
-            }
-        }
-
-        this.isInsert = 0
-      }else{
-        this.boxes.push({
-            id: this.id,
-            action: 'as',
-            cases: [{
-                content: e.target.value,
-                next: 0
-            }]
-        })
-        this.setPrevBox(prev_row_id)
-      }
-      this.id++
-    },
+  
     addHsNewCase(id, e){
       if(e.target.value){
-        isChange = true
+          isChange = true
           var box = this.box(id)
           box.cases.push({
               content: e.target.value,
@@ -320,6 +257,7 @@ const app = new Vue({
           this.activeCases[id] = e.target.value
       }
     },
+
     activeHsCase(row, i, e){
         if(this.activeCases[row.id] != i.content){
             this.activeCases[row.id] = i.content
@@ -335,23 +273,10 @@ const app = new Vue({
       if(id == 1){
         this.boxes = []
         this.id = 1
-      }else if(action=='as' && confirm("Delete Only This Step?")){
-          let box = this.box(this.rows().find(i => i.next == id).id)
-
-          if(box.action == 'hs'){
-            this.getCase(box.cases, this.activeCases[box.id]).next = next
-          }else if(box.action == 'ad'){
-            this.getCase(box.cases, this.activeCases[box.id]).next = next
-          }
-
-          let idx = this.boxes.findIndex(e => e.id == id)
-          this.boxes.splice(idx, 1)
       }else if(action=='hs' && this.box(id).cases.length - 1){
-        let next = this.box(id).cases[idx].next
-        this.box(id).cases.splice(idx, 1)
-        if(flag){
-          this.activeCases[id] = this.box(id).cases[0].content
-        }
+        let next = this.box(id).cases[idx].next;
+        this.box(id).cases.splice(idx, 1);
+        flag && ( this.activeCases[id] = this.box(id).cases[0].content ) ;
         this.deleteBox(next)
       }else if(action=='ad'){
           let next = 0
@@ -366,6 +291,19 @@ const app = new Vue({
               this.getCase(box.cases, this.activeCases[box.id]).next = next
           }else if(box.action == 'as'){
               box.cases[0].next = next
+          }
+
+          let idx = this.boxes.findIndex(e => e.id == id)
+          this.boxes.splice(idx, 1)
+      }else if(confirm("Delete Only This Step?")){
+          let box = this.box(this.rows().find(i => i.next == id).id)
+
+          if(box.action == 'hs'){
+            this.getCase(box.cases, this.activeCases[box.id]).next = next
+          }else if(box.action == 'as'){
+            box.cases[0].next = next
+          }else if(box.action == 'ad'){
+            this.getCase(box.cases, this.activeCases[box.id]).next = next
           }
 
           let idx = this.boxes.findIndex(e => e.id == id)
@@ -414,11 +352,11 @@ const app = new Vue({
       jQuery(e.target).after(el)
       el.focus()
     },
+
     changeAsCase(row, e){
       isChange = true
       this.box(row.id).cases[0].content = e.target.value
     },
-  
     
     selectAsBox(i, e){
       let prev_row_id = this.prev_row_id;
@@ -433,11 +371,13 @@ const app = new Vue({
         })
       }
     },
+
     adClick(e){
       e.stopPropagation()
       jQuery(".dropList").css( 'visibility', 'hidden')
       jQuery(e.currentTarget).parent().find(".dropList").css('visibility', 'visible')
     },
+
     addAdMain(row, e){
       this.ad.push({
         main: e.target.value,
@@ -445,6 +385,7 @@ const app = new Vue({
       })
       this.activeAdMain(row, e)
     },
+
     activeAdMain(row, e){
       if(row){
         if(e.target.value != this.activeCases[row.id][0]){
@@ -516,6 +457,7 @@ const app = new Vue({
       }
       this.renderKey++
     },
+
     addAdSub(row, e){
       isChange = true
         this.ad
@@ -523,21 +465,25 @@ const app = new Vue({
             .sub.push(e.target.value)
         this.activeAdSub(row, e)
     },
+
     activeAdSub(row, e){
       isChange = true
         this.activeCases[row.id][1] = e.target.value
         this.renderKey++
     },
+
     isActiveAdMain(i, id) {
         let arr = this.box(id).cases.map( item => item.content[0] )
         return arr.includes(i)
     },
+
     isActiveAdSub(i, id) {
       let arr = this.box(id).cases
           .filter( item => this.activeCases[id][0] == item.content[0] )
           .map( item => item.content[1])
       return arr.includes(i)
     },
+
     deleteAdMain(main){
       let r = confirm('Really Delete?')
       if(!r) return
@@ -580,6 +526,7 @@ const app = new Vue({
         }
       }
     },
+
     deleteAdSub(main, sub){
         let r = confirm('Really Delete?');
       if(!r) return
@@ -622,6 +569,7 @@ const app = new Vue({
         }
       }
     },
+
     getImage(row){
         if(doc = this.docs.find( i => i.caseid == row.id))
         return doc.data
