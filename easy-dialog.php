@@ -128,25 +128,20 @@
             <div :key="renderKey">
               <div class="asRow">
                 <div class="rowNumber">
-                  <template v-if="isInsert == 's'">
-                    <button style="border-radius: 9999px;" @click="insertRow('n')">-</button>
-                  </template>
-                  <template v-else>
-                    <button style="border-radius: 9999px;" @click="insertRow('s')">+</button>
-                  </template>
+                    <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(0)">
+                      {{ insert === 0 ? '-' : '+' }}
+                    </button>
                 </div>
-                <template v-if="isInsert == 's'">
+                <template v-if="insert === 0">
                   <div class="rowBody">
                       <div class="asBox">
                           <template v-if="rows()[0]['action'] != 'hs'">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addHsNewBox(prev_row_id, $event)">
+                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
                           </template>
                       </div>
                       <div class="asBox">
-                        <template 
-                          v-if="rows()[0]['action'] != 'as'"
-                        >
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addAsNewBox(prev_row_id, $event)" @click="adClick">
+                        <template v-if="rows()[0]['action'] != 'as'">
+                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
                           <div v-if="ases().length" class="dropList">
                               <template v-for="i in ases()">
                                   <div class="adItem">
@@ -201,12 +196,9 @@
               <template v-for="(row, index) in rows()" :key="index">
                 <div class="asRow">
                   <div class="rowNumber">
-                    <template v-if="row.id == isInsert.id">
-                      <button @click="insertRow(row)">-</button>
-                    </template>
-                    <template v-else>
-                      <button @click="insertRow(row)">+</button>
-                    </template>
+                    <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(row.id)">
+                      {{ insert === row.id ? '-' : '+' }}
+                    </button>
                   </div>
                   <div class="rowBody">
                     <template v-if="row.action == 'hs'">
@@ -214,7 +206,7 @@
                         <div 
                           v-for="(i, idx) in box(row.id).cases"
                           class="hsCase" 
-                          :class="{active: i.content == hs_active[row.id]}"
+                          :class="{active: i.content == activeCases[row.id]}"
                           @click.stop.prevent = "activeHsCase(row, i, $event)"
                         >
                           <input
@@ -224,7 +216,7 @@
                             @dblclick="changeHsCase(row, i, $event)"
                             readonly
                           >
-                          <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == hs_active[row.id], idx)">×</span>
+                          <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == activeCases[row.id], idx)">×</span>
                         </div>
                         <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addHsNewCase(row.id, $event)">
                       </div>
@@ -303,7 +295,7 @@
                               <div class="asBoxSub">
                                   <div style="background: #fe5500; color: white; display:flex; ">
                                     <input type="text" 
-                                        :value="ad_active[row.id][0]" 
+                                        :value="activeCases[row.id][0]" 
                                         placeholder="Select Main" 
                                         @click="adClick"
                                         style="background: #fe5500; color: white;"
@@ -324,7 +316,7 @@
                               <div class="asBoxSub">
                                 <input 
                                   type="text" 
-                                  :value="ad_active[row.id][1]" 
+                                  :value="activeCases[row.id][1]" 
                                   placeholder="Select Main" 
                                   @click="adClick"
                                   style="background: #fe5500; color: white"
@@ -337,7 +329,7 @@
                                     @change="addAdSub(row, $event)"
                                   >
                                   <hr>
-                                  <template v-for="i in ad_subs(ad_active[row.id][0])">
+                                  <template v-for="i in ad_subs(activeCases[row.id][0])">
                                     <div 
                                       class="adItem" 
                                       :style="isActiveAdSub(i, row.id) ? 'background:  #fe5500;' : ''"
@@ -349,7 +341,7 @@
                                       >
                                       <span 
                                         class="removeMark" 
-                                        @click.stop.prevent="deleteAdSub(ad_active[row.id][0], i)"
+                                        @click.stop.prevent="deleteAdSub(activeCases[row.id][0], i)"
                                       >
                                         ×
                                       </span>
@@ -393,7 +385,7 @@
                     </template>
                   </div>
                 </div>
-                <template v-if="row.id == isInsert.id">
+                <template v-if="row.id == insert">
                   <div class="asRow">
                     <div class="rowNumber">
                       <input type="text" :value="rows().length + 1">
@@ -401,14 +393,12 @@
                     <div class="rowBody">
                         <div class="asBox">
                             <template v-if=" row.action != 'hs' ">
-                                <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addHsNewBox(prev_row_id, $event)">
+                                <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
                             </template>
                         </div>
                         <div class="asBox">
-                          <template 
-                            v-if=" row['action'] != 'as' "
-                          >
-                            <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addAsNewBox(prev_row_id, $event)" @click="adClick">
+                          <template  v-if=" row['action'] != 'as' ">
+                            <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
                             <div v-if="ases().length" class="dropList">
                                 <template v-for="i in ases()">
                                     <div class="adItem">
@@ -461,7 +451,7 @@
                   </div>
                 </template>
               </template>
-              <template v-if="!isInsert && (isInsert != 's')">
+              <template v-if="!(insert + 1)">
                 <div class="asRow">
                   <div class="rowNumber">
                     <input type="text" :value="rows().length + 1">
@@ -469,14 +459,14 @@
                   <div class="rowBody">
                       <div class="asBox">
                           <template v-if="rows().length ? rows()[rows().length-1]['action'] != 'hs' : true">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addHsNewBox(prev_row_id, $event)">
+                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
                           </template>
                       </div>
                       <div class="asBox">
                         <template 
                           v-if="rows().length ? rows()[rows().length-1]['action'] != 'as' : true"
                         >
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addAsNewBox(prev_row_id, $event)" @click="adClick">
+                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
                           <div v-if="ases().length" class="dropList">
                               <template v-for="i in ases()">
                                   <div class="adItem">
