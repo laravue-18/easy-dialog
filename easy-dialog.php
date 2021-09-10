@@ -126,7 +126,7 @@
         <section class="alexa-section">
           <div id="easyDialog">
             <div :key="renderKey">
-              <div class="asRow">
+              <div class="asRow">  <!-- StartRow -->
                 <div class="rowNumber">
                     <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(0)">
                       {{ insert === 0 ? '-' : '+' }}
@@ -136,12 +136,12 @@
                   <div class="rowBody">
                       <div class="asBox">
                           <template v-if="rows()[0]['action'] != 'hs'">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
+                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
                           </template>
                       </div>
                       <div class="asBox">
                         <template v-if="rows()[0]['action'] != 'as'">
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
+                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
                           <div v-if="ases().length" class="dropList">
                               <template v-for="i in ases()">
                                   <div class="adItem">
@@ -152,43 +152,28 @@
                         </template>
                       </div>
                       <div class="asBox">
-                        <div class="adBox-qwer">
-                          <template 
-                            v-if="rows()[0]['action'] != 'ad'"
-                          >
-                            <div class="asBoxSub">
-                              <input type="text" placeholder="Select Main" readonly @click="adClick">
-                              <div class="dropList">
-                                <input 
-                                  type="text" 
-                                  placeholder="add name of new library" 
-                                  @change="addAdMain(false, $event)"
-                                >
-                                <hr>
-                                <div 
-                                  class="adItem" 
-                                  v-for="i in ad_mains()"
-                                >
-                                    <input 
-                                      type="text" 
-                                      :value="i" 
-                                      @click="activeAdMain(false, $event)" 
-                                      readonly
-                                    >
-                                    <!-- <span 
-                                      class="removeMark" 
-                                      @click.stop.prevent="deleteAdMain(i)"
-                                    >
-                                      ×
-                                    </span> -->
-                                </div>
+                        <template 
+                          v-if="rows()[0]['action'] != 'ad'"
+                        >
+                          <div class="row g-0">
+                            <div class="col-6 p-1">
+                              <div class="btn-group d-grid">
+                                <button type="button" class="btn bg-white btn-sm dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  Select Main
+                                </button>
+                                <ul class="dropdown-menu">
+                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li v-for="main in ad_mains()">
+                                    <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
+                                  </li>
+                                </ul>
                               </div>
                             </div>
-                            <div class="asBoxSub">
-                                <input type="text" placeholder="Select Sub" readonly>
+                            <div class="col-6 p-1">
                             </div>
-                          </template>
-                        </div>
+                          </div>
+                        </template>
                       </div>
                   </div>
                 </template>
@@ -218,7 +203,7 @@
                           >
                           <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == activeCases[row.id], idx)">×</span>
                         </div>
-                        <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addHsNewCase(row.id, $event)">
+                        <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addNewCase('hs', row.id, $event)">
                       </div>
                       <div class="asBox"></div>
                       <div class="asBox"></div>
@@ -291,96 +276,85 @@
                         <div class="asBox"></div>
                         <div class="asBox"></div>
                         <div class="asBox">
-                          <div class="adBox-qwer">
-                              <div class="asBoxSub">
-                                  <div style="background: #fe5500; color: white; display:flex; ">
-                                    <input type="text" 
-                                        :value="activeCases[row.id][0]" 
-                                        placeholder="Select Main" 
-                                        @click="adClick"
-                                        style="background: #fe5500; color: white;"
-                                        readonly>
-                                    <span class="removeMark" @click.stop.prevent="deleteCase(row)">×</span>
-                                    <div class="dropList">
-                                        <input type="text" placeholder="add name of new library" @change="addAdMain(row, $event)">
-                                        <hr>
-                                        <template v-for="i in ad_mains()">
-                                            <div :class="isActiveAdMain(i, row.id) ? 'adItem active' : 'adItem'">
-                                                <input type="text" :value="i" @click="activeAdMain(row, $event)" readonly>
-                                                <!-- <span class="removeMark" @click.stop.prevent="deleteAdMain(i)">×</span> -->
-                                            </div>
-                                        </template>
-                                    </div>
-                                  </div>
+                          <div
+                            v-for="(i, idx) in box(row.id).cases"
+                            class="border rounded row g-0"
+                            :class="{'border-primary': (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1]))}"
+                          >
+                            <div class="col-6 p-1">
+                              <div class="btn-group d-grid">
+                                <button type="button" class="btn bg-eb-primary dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  {{ i.content[0] }}
+                                </button>
+                                <ul class="dropdown-menu">
+                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event, idx)" placeholder="Add New ..."></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li v-for="main in ad_mains()">
+                                    <span class="dropdown-item" @click="updateCase('main', row, main, idx)">{{main}}</span>
+                                  </li>
+                                </ul>
                               </div>
-                              <div class="asBoxSub">
-                                <input 
-                                  type="text" 
-                                  :value="activeCases[row.id][1]" 
-                                  placeholder="Select Main" 
-                                  @click="adClick"
-                                  style="background: #fe5500; color: white"
-                                  readonly
-                                >
-                                <div class="dropList">
-                                  <input 
-                                    type="text" 
-                                    placeholder="add name of new library" 
-                                    @change="addAdSub(row, $event)"
-                                  >
-                                  <hr>
-                                  <template v-for="i in ad_subs(activeCases[row.id][0])">
-                                    <div 
-                                      class="adItem" 
-                                      :style="isActiveAdSub(i, row.id) ? 'background:  #fe5500;' : ''"
-                                    >
-                                      <input 
-                                        type="text" 
-                                        :value="i" @click="activeAdSub(row, $event)" 
-                                        readonly
-                                      >
-                                      <span 
-                                        class="removeMark" 
-                                        @click.stop.prevent="deleteAdSub(activeCases[row.id][0], i)"
-                                      >
-                                        ×
-                                      </span>
-                                    </div>
-                                  </template>
-                                </div>
+                            </div>
+                            <div class="col-6 p-1">
+                              <div class="btn-group d-grid">
+                                <button type="button" class="btn bg-eb-primary dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  {{ i.content[1] }}
+                                </button>
+                                <ul class="dropdown-menu">
+                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, i.content[0], $event, idx)" placeholder="Add New ..."></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li v-for="sub in ad_subs(i.content[0])">
+                                    <span class="dropdown-item" @click="updateCase('sub',row, sub, idx)">{{ sub }}</span>
+                                  </li>
+                                </ul>
                               </div>
+                            </div>
+                          </div>
+                          <div class="row g-0">
+                            <div class="col-6 p-1">
+                              <div class="btn-group d-grid">
+                                <button type="button" class="btn bg-white btn-sm dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  Select Main
+                                </button>
+                                <ul class="dropdown-menu">
+                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event, -1)" placeholder="Add New ..."></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li v-for="i in ad_mains()">
+                                    <span class="dropdown-item" @click="addNewCase('ad', row.id, i)">{{i}}</span>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                            <div class="col-6 p-1">
+                              <input 
+                                type="file" hidden
+                                ref="photo"
+                                style="visibility:hidden; height: 0;"
+                                @change="updateScript(row, $event)"
+                              >
+                              <button
+                                @click="selectNewScript"
+                                class="btn bg-white btn-sm"
+                              >
+                                Select Script
+                              </button>
+                              <button 
+                                @click="deleteScript(row)" v-show="getScript(row)"
+                                style="
+                                  margin: 3px;
+                                  padding: 5px 10px;
+                                  border-radius: 9999px;
+                                  height: 2.2em;"
+                              >
+                                Remove Script
+                              </button>
+                            </div>
                           </div>
                           <div class="mt-2" v-if="getScript(row)">
                             <div style="background: white; margin-top:2px; border-radius: 2px;">
                               {{ getScript(row) }}
                             </div>
                           </div>
-                          <input 
-                            type="file" hidden
-                            ref="photo"
-                            style="visibility:hidden; height: 0;"
-                            @change="updateScript(row, $event)"
-                          >
-                          <button
-                            @click="selectNewScript"
-                            style="
-                              margin: 3px;
-                              padding: 5px 10px;
-                              border-radius: 9999px;
-                              height: 2.2em;"
-                          >
-                            Select Script
-                          </button>
-                          <button 
-                            @click="deleteScript(row)" v-show="getScript(row)"
-                            style="
-                              margin: 3px;
-                              padding: 5px 10px;
-                              border-radius: 9999px;
-                              height: 2.2em;"
-                          >
-                            Remove Script
-                          </button>
                         </div>
                     </template>
                   </div>
@@ -393,12 +367,12 @@
                     <div class="rowBody">
                         <div class="asBox">
                             <template v-if=" row.action != 'hs' ">
-                                <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
+                                <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
                             </template>
                         </div>
                         <div class="asBox">
                           <template  v-if=" row['action'] != 'as' ">
-                            <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
+                            <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
                             <div v-if="ases().length" class="dropList">
                                 <template v-for="i in ases()">
                                     <div class="adItem">
@@ -409,43 +383,28 @@
                           </template>
                         </div>
                         <div class="asBox">
-                          <div class="adBox-qwer">
-                            <template 
-                              v-if="row['action'] != 'ad'"
-                            >
-                              <div class="asBoxSub">
-                                <input type="text" placeholder="Select Main" readonly @click="adClick">
-                                <div class="dropList">
-                                  <input 
-                                    type="text" 
-                                    placeholder="add name of new library" 
-                                    @change="addAdMain(false, $event)"
-                                  >
-                                  <hr>
-                                  <div 
-                                    class="adItem" 
-                                    v-for="i in ad_mains()"
-                                  >
-                                      <input 
-                                        type="text" 
-                                        :value="i" 
-                                        @click="activeAdMain(false, $event)" 
-                                        readonly
-                                      >
-                                      <!-- <span 
-                                        class="removeMark" 
-                                        @click.stop.prevent="deleteAdMain(i)"
-                                      >
-                                        ×
-                                      </span> -->
-                                  </div>
+                          <template 
+                            v-if="row['action'] != 'ad'"
+                          >
+                            <div class="row g-0">
+                              <div class="col-6 p-1">
+                                <div class="btn-group d-grid">
+                                  <button type="button" class="btn bg-white btn-sm dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Select Main
+                                  </button>
+                                  <ul class="dropdown-menu">
+                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li v-for="main in ad_mains()">
+                                      <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
+                                    </li>
+                                  </ul>
                                 </div>
                               </div>
-                              <div class="asBoxSub">
-                                  <input type="text" placeholder="Select Sub" readonly>
+                              <div class="col-6 p-1">
                               </div>
-                            </template>
-                          </div>
+                            </div>
+                          </template>
                         </div>
                     </div>
                   </div>
@@ -459,14 +418,14 @@
                   <div class="rowBody">
                       <div class="asBox">
                           <template v-if="rows().length ? rows()[rows().length-1]['action'] != 'hs' : true">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event)">
+                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
                           </template>
                       </div>
                       <div class="asBox">
                         <template 
                           v-if="rows().length ? rows()[rows().length-1]['action'] != 'as' : true"
                         >
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event)" @click="adClick">
+                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
                           <div v-if="ases().length" class="dropList">
                               <template v-for="i in ases()">
                                   <div class="adItem">
@@ -477,43 +436,26 @@
                         </template>
                       </div>
                       <div class="asBox">
-                        <div class="adBox-qwer">
-                          <template 
-                            v-if="rows().length ? rows()[rows().length-1]['action'] != 'ad' : true"
-                          >
-                            <div class="asBoxSub">
-                              <input type="text" placeholder="Select Main" readonly @click="adClick">
-                              <div class="dropList">
-                                <input 
-                                  type="text" 
-                                  placeholder="add name of new library" 
-                                  @change="addAdMain(false, $event)"
-                                >
-                                <hr>
-                                <div 
-                                  class="adItem" 
-                                  v-for="i in ad_mains()"
-                                >
-                                    <input 
-                                      type="text" 
-                                      :value="i" 
-                                      @click="activeAdMain(false, $event)" 
-                                      readonly
-                                    >
-                                    <!-- <span 
-                                      class="removeMark" 
-                                      @click.stop.prevent="deleteAdMain(i)"
-                                    >
-                                      ×
-                                    </span> -->
-                                </div>
-                              </div>
+                        <template 
+                          v-if="rows().length ? rows()[rows().length-1]['action'] != 'ad' : true"
+                        >
+                          <div class="col-6 p-1">
+                            <div class="btn-group d-grid">
+                              <button type="button" class="btn bg-white btn-sm dropdown-toggle text-start btn-sm arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Main
+                              </button>
+                              <ul class="dropdown-menu">
+                                <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li v-for="main in ad_mains()">
+                                  <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
+                                </li>
+                              </ul>
                             </div>
-                            <div class="asBoxSub">
-                                <input type="text" placeholder="Select Sub" readonly>
-                            </div>
-                          </template>
-                        </div>
+                          </div>
+                          <div class="col-6 p-1">
+                          </div>
+                        </template>
                       </div>
                   </div>
                 </div>
@@ -546,7 +488,7 @@
                     BUILD easyBOT
                   </span>
                 </button>
-                <button 
+                <!-- <button 
                   id="reset" 
                   class="btn btn-primary btn-lg" 
                   style="
@@ -565,7 +507,7 @@
                       text-shadow:0px 0px 20px #000;"
                   >
                     Reset
-                  </span>
+                  </span> -->
                 </button>
               </div>
               

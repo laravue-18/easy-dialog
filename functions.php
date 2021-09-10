@@ -15,7 +15,7 @@ if ( !function_exists( 'chld_thm_cfg_locale_css' ) ):
 endif;
 
 function bootstrap_enqueue_scripts() {
-	if(is_page(array(2497))){
+	if(is_page(array(2497, 2734, 3828))){
         wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri() . '/css/bootstrap.min.css');
         wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
         wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.bundle.min.js');

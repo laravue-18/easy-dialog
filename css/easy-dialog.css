@@ -324,3 +324,13 @@ input.listItem{
 .tooltip-inner{
     max-width: 500px !important;
 }
+
+.bg-eb-primary{
+    background-color: #fe5500;
+}
+
+.arrow-end:after{
+    position:absolute;
+    right: 0.25em;
+    top: 1em;
+}
