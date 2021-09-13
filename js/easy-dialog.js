@@ -426,15 +426,28 @@ const app = new Vue({
     },
 
     updateCase(type, row, val, idx){
+      let box = this.box(row.id)
+      
       if(type=='main'){
-        let box = this.box(row.id)
+        for(let i = 0, l = box.cases.length; i < l; i++){
+          let branch = box.cases[i]
+          if(branch.content[0] == val && (branch.content[1] == val)) {
+            alert('already exists')
+            return
+          }
+        }
         box.cases[idx].content = [val, val]
-        this.renderKey++
       }else if(type=='sub'){
-        let box = this.box(row.id)
+        for(let i = 0, l = box.cases.length; i < l; i++){
+          let branch = box.cases[i]
+          if(branch.content[0] == box.cases[idx]['content'][0] && (branch.content[1] == val)) {
+            alert('already exists')
+            return
+          }
+        }
         box.cases[idx].content[1] = val
-        this.renderKey++
       }
+      this.renderKey++
     },
 
     addAdSub(row, main, e, idx){
