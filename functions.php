@@ -20,8 +20,13 @@ function bootstrap_enqueue_scripts() {
         wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
         wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.bundle.min.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
-        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog.js', 'vuejs', '', true);
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
+    }
+    if(is_page(array(2497))){
+        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog.js', 'vuejs', '', true);
+    }
+    if(is_page(array(2734, 3828))){
+        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging.js', 'vuejs', '', true);
     }
 }
 add_action( 'wp_enqueue_scripts', 'bootstrap_enqueue_scripts' );

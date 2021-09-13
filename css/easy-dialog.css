@@ -334,3 +334,9 @@ input.listItem{
     right: 0.25em;
     top: 1em;
 }
+
+.ctrl-btn-wrapper .ctrl-btn{ display: none; white-space: nowrap;}
+.ctrl-btn-wrapper:hover .ctrl-btn{ display: block; }
+
+.ctrl-btn i{ color: white; cursor: pointer;}
+.ctrl-btn i:hover{ color: black;}

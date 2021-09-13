@@ -303,11 +303,9 @@ const app = new Vue({
       }
     },
 
-    activeHsCase(row, i, e){
-        if(this.activeCases[row.id] != i.content){
-            this.activeCases[row.id] = i.content
+    activeCase(row, i){
+          this.activeCases[row.id] = i.content
           this.renderKey++
-        }
     },
     
     deleteCase(row, flag, idx){
@@ -450,12 +448,10 @@ const app = new Vue({
       if(type=='main'){
         let box = this.box(row.id)
         box.cases[idx].content = [val, val]
-        this.activeCases[row.id] = [val, val]
         this.renderKey++
       }else if(type=='sub'){
         let box = this.box(row.id)
         box.cases[idx].content[1] = val
-        this.activeCases[row.id][1] = val
         this.renderKey++
       }
     },
