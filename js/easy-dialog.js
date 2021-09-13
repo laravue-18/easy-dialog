@@ -316,36 +316,17 @@ const app = new Vue({
       if(id == 1){
         this.boxes = []
         this.id = 1
-      }else if(action=='hs' && this.box(id).cases.length - 1){
+      }else if(this.box(id).cases.length - 1){
         let next = this.box(id).cases[idx].next;
         this.box(id).cases.splice(idx, 1);
         flag && ( this.activeCases[id] = this.box(id).cases[0].content ) ;
         this.deleteBox(next)
-      }else if(action=='ad' && this.box(id).cases.length - 1){
-          let next = 0
-          if(this.box(id).cases.length > 1){
-            next = this.box(id).cases[1].next
-          }else{
-            next = this.box(id).cases[0].next
-          }
-          let box = this.box(this.rows().find(i => i.next == id).id)
-
-          if(box.action == 'hs'){
-              this.getCase(box.cases, this.activeCases[box.id]).next = next
-          }else if(box.action == 'as'){
-              box.cases[0].next = next
-          }
-
-          let idx = this.boxes.findIndex(e => e.id == id)
-          this.boxes.splice(idx, 1)
       }else if(confirm("Delete Only This Step?")){
           let box = this.box(this.rows().find(i => i.next == id).id)
 
-          if(box.action == 'hs'){
-            this.getCase(box.cases, this.activeCases[box.id]).next = next
-          }else if(box.action == 'as'){
+          if(box.action == 'as'){
             box.cases[0].next = next
-          }else if(box.action == 'ad'){
+          }else{
             this.getCase(box.cases, this.activeCases[box.id]).next = next
           }
 

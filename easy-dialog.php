@@ -314,7 +314,9 @@
                             <div class="position-absolute top-50 end-100 translate-middle-y p-1 ctrl-btn">
                               <div class="bg-dark bg-opacity-25 rounded p-1">
                                 <i class="fa fa-check" title="Active" @click="activeCase(row, i)"></i>
-                                <i class="fa fa-times" title="Delete"></i>
+                                <i class="fa fa-times" title="Delete" 
+                                  @click.stop.prevent="deleteCase(row, (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1])), idx)"
+                                ></i>
                               </div>
                             </div>
                           </div>
