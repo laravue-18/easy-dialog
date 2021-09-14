@@ -313,14 +313,14 @@ const app = new Vue({
       
       let {id, action, next} = row
       
-      if(id == 1){
-        this.boxes = []
-        this.id = 1
-      }else if(this.box(id).cases.length - 1){
+       if(this.box(id).cases.length - 1){
         let next = this.box(id).cases[idx].next;
         this.box(id).cases.splice(idx, 1);
         flag && ( this.activeCases[id] = this.box(id).cases[0].content ) ;
         this.deleteBox(next)
+      }else if(id == 1){
+        this.boxes = []
+        this.id = 1
       }else if(confirm("Delete Only This Step?")){
           let box = this.box(this.rows().find(i => i.next == id).id)
 
