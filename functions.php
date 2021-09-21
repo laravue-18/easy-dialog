@@ -18,6 +18,7 @@ function bootstrap_enqueue_scripts() {
 	if(is_page(array(2497, 2734, 3828))){
         wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri() . '/css/bootstrap.min.css');
         wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
+        wp_enqueue_style( 'fontawesome', 'https://pro.fontawesome.com/releases/v5.10.0/css/all.css');
         wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.bundle.min.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
@@ -63,6 +64,9 @@ add_action( 'wp_ajax_nopriv_bot_paid', 'blah_do_ajax_hello' );
 
 add_action( 'wp_ajax_easyChat', 'blah_do_ajax_chatbot' );
 add_action( 'wp_ajax_nopriv_easyChat', 'blah_do_ajax_chatbot' );
+
+add_action( 'wp_ajax_androidapp', 'blah_do_ajax_chatbot' );
+add_action( 'wp_ajax_nopriv_androidapp', 'blah_do_ajax_chatbot' );
 
 add_action( 'wp_ajax_dispatch', 'blah_do_ajax_chatbot' );
 add_action( 'wp_ajax_nopriv_dispatch', 'blah_do_ajax_chatbot' );

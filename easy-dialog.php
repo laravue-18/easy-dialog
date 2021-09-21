@@ -278,8 +278,8 @@
                         <div class="asBox">
                           <div
                             v-for="(i, idx) in box(row.id).cases"
-                            class="border rounded position-relative ctrl-btn-wrapper"
-                            :class="{'border-primary': (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1]))}"
+                            class="rounded position-relative ctrl-btn-wrapper"
+                            :class="{'border border-warning': (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1]))}"
                           >
                             <div class="row g-0">
                               <div class="col-6 p-1">
