@@ -192,7 +192,7 @@
                           v-for="(i, idx) in box(row.id).cases"
                           class="hsCase" 
                           :class="{active: i.content == activeCases[row.id]}"
-                          @click.stop.prevent = "activeCase(row, i)"
+                          @click.stop.prevent = "activeCase(row, i.content)"
                         >
                           <input
                             class="listItem"
@@ -240,7 +240,7 @@
                           type="file" hidden
                           ref="photo"
                           style="visibility:hidden; height: 0;"
-                          @change="updatePhotoPreview(row, $event)"
+                          @blur="updatePhotoPreview(row, $event)"
                         >
                         <button
                           @click="selectNewPhoto"
@@ -276,29 +276,52 @@
                         <div class="asBox"></div>
                         <div class="asBox"></div>
                         <div class="asBox">
-                          <div
-                            v-for="(i, idx) in box(row.id).cases"
-                            class="rounded position-relative ctrl-btn-wrapper"
-                            :class="{'border border-warning': (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1]))}"
-                          >
-                            <div class="row g-0">
-                              <div class="col-6 p-1">
+                          <!-- new -->
+                          <div class="row g-0">
+                            <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-eb-primary dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ i.content[0] }}
+                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ main(row) }}
                                   </button>
                                   <ul class="dropdown-menu">
-                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event, idx)" placeholder="Add New ..."></li>
+                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event)" placeholder="Add New ..."></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li v-for="main in ad_mains()">
-                                      <span class="dropdown-item" @click="updateCase('main', row, main, idx)">{{main}}</span>
+                                      <span class="dropdown-item" @click="updateCase('main', row, main)">{{main}}</span>
                                     </li>
                                   </ul>
                                 </div>
-                              </div>
-                              <div class="col-6 p-1">
+                                <div class="mt-1">
+                                  <input 
+                                    type="file" hidden
+                                    ref="photo"
+                                    style="visibility:hidden; height: 0;"
+                                    @change="updateScript(row, $event)"
+                                  >
+                                  <button
+                                    @click="selectNewScript"
+                                    class="btn bg-white"
+                                  >
+                                    Select Script
+                                  </button>
+                                  <button 
+                                    @click="deleteScript(row)" v-show="getScript(row)"
+                                    style="
+                                      margin: 3px;
+                                      padding: 5px 10px;
+                                      border-radius: 9999px;
+                                      height: 2.2em;"
+                                  >
+                                    Remove Script
+                                  </button>
+                                </div>
+                            </div>
+                            <div class="col-6 p-1">
+                              <div class="mb-1 position-relative ctrl-btn-wrapper"
+                                v-for="(i, idx) in box(row.id).cases"
+                              >
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-eb-primary dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button type="button" :class="'btn dropdown-toggle text-white text-start arrow-end bg-eb-' + (activeCases[row.id]==i.content[1] ? 'primary' : 'secondary')" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ i.content[1] }}
                                   </button>
                                   <ul class="dropdown-menu">
@@ -309,60 +332,27 @@
                                     </li>
                                   </ul>
                                 </div>
+                                <div class="position-absolute top-50 end-100 translate-middle-y p-1 ctrl-btn">
+                                  <div class="bg-dark bg-opacity-25 rounded p-1">
+                                    <i class="fa fa-check" title="Active" @click="activeCase(row, i.content[1])"></i>
+                                    <i class="fa fa-times" title="Delete" 
+                                      @click.stop.prevent="deleteCase(row, (i.content[1] == activeCases[row.id]), idx)"
+                                    ></i>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            <div class="position-absolute top-50 end-100 translate-middle-y p-1 ctrl-btn">
-                              <div class="bg-dark bg-opacity-25 rounded p-1">
-                                <i class="fa fa-check" title="Active" @click="activeCase(row, i)"></i>
-                                <i class="fa fa-times" title="Delete" 
-                                  @click.stop.prevent="deleteCase(row, (i.content[0] == activeCases[row.id][0] && (i.content[1] == activeCases[row.id][1])), idx)"
-                                ></i>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row g-0">
-                            <div class="col-6 p-1">
                               <div class="btn-group d-grid">
                                 <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Select Main
+                                  Select Sub
                                 </button>
                                 <ul class="dropdown-menu">
-                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event, -1)" placeholder="Add New ..."></li>
+                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, main(row), $event, -1)" placeholder="Add New ..."></li>
                                   <li><hr class="dropdown-divider"></li>
-                                  <li v-for="i in ad_mains()">
+                                  <li v-for="i in ad_subs(main(row))">
                                     <span class="dropdown-item" @click="addNewCase('ad', row.id, i)">{{i}}</span>
                                   </li>
                                 </ul>
                               </div>
-                            </div>
-                            <div class="col-6 p-1">
-                              <input 
-                                type="file" hidden
-                                ref="photo"
-                                style="visibility:hidden; height: 0;"
-                                @change="updateScript(row, $event)"
-                              >
-                              <button
-                                @click="selectNewScript"
-                                class="btn bg-white"
-                              >
-                                Select Script
-                              </button>
-                              <button 
-                                @click="deleteScript(row)" v-show="getScript(row)"
-                                style="
-                                  margin: 3px;
-                                  padding: 5px 10px;
-                                  border-radius: 9999px;
-                                  height: 2.2em;"
-                              >
-                                Remove Script
-                              </button>
-                            </div>
-                          </div>
-                          <div class="mt-2" v-if="getScript(row)">
-                            <div style="background: white; margin-top:2px; border-radius: 2px;">
-                              {{ getScript(row) }}
                             </div>
                           </div>
                         </div>

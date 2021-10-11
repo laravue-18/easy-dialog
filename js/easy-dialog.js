@@ -79,7 +79,7 @@ const app = new Vue({
           }else if(prev_box.action == 'as'){
               prev_box.cases[0].next = this.id
           }else{
-            let ad_case = prev_box.cases.find(i => i.content[0] == this.activeCases[prev_box.id][0] && i.content[1] == this.activeCases[prev_box.id][1] )
+            let ad_case = prev_box.cases.find(i => i.content[1] == this.activeCases[prev_box.id] )
             if(ad_case){
                 ad_case.next = this.id
             }else{
@@ -146,7 +146,7 @@ const app = new Vue({
           }else if(box.action == 'as'){
               box_id = box.cases[0].next
           }else if(box.action == 'ad'){
-              let ad_case = box.cases.find(i => i.content[0] == this.activeCases[box_id][0] && i.content[1] == this.activeCases[box_id][1] )
+              let ad_case = box.cases.find(i => i.content[1] == this.activeCases[box_id] )
               if(ad_case){
                   box_id = ad_case.next
               }else{
@@ -169,6 +169,10 @@ const app = new Vue({
     ases(){
         let arr = this.rows().map(i => i.id)
         return this.boxes.filter(i => i.action == 'as' && !arr.includes(i.id))
+    },
+
+    main(row){
+      return this.box(row.id).cases[0].content[0]
     },
 
     ad_mains(){
@@ -216,7 +220,7 @@ const app = new Vue({
             action: action,
             cases: [{ content: arr, next: next }]
         })
-        this.activeCases[this.id] = arr
+        this.activeCases[this.id] = val
 
         if(prev_box.action == 'hs'){
           prev_box.cases.find(i => i.content == this.activeCases[prev_box.id] ).next = this.id
@@ -245,7 +249,7 @@ const app = new Vue({
               'next': 0
             }]
           })
-          this.activeCases[this.id] = [val, val]
+          this.activeCases[this.id] = val
 
           this.setPrevBox(prev_row_id)
         }else{
@@ -282,7 +286,7 @@ const app = new Vue({
               next: 0
           })
           this.activeCases[id] = e.target.value
-      }else{
+      }else if(type == 'ad'){
         isChange = true
         let box = this.box(id)
         for(let i = 0, l = box.cases.length; i < l; i++){
@@ -295,16 +299,16 @@ const app = new Vue({
         }
         if(exist) return
         box.cases.push({
-            content: [e, e],
+            content: [box.cases[0].content[0], e],
             next: 0
         })
-        this.activeCases[id] = [e, e]
+        this.activeCases[id] = e
         this.renderKey++
       }
     },
 
     activeCase(row, i){
-          this.activeCases[row.id] = i.content
+          this.activeCases[row.id] = i
           this.renderKey++
     },
     
@@ -402,23 +406,20 @@ const app = new Vue({
       jQuery(e.currentTarget).parent().find(".dropList").css('visibility', 'visible')
     },
 
-    addAdMain(row, e, idx){
+    addAdMain(row, e){
       let val = e.target.value
 
       for(let i=0, l=this.ad.length; i<l; i++){
-        if(this.ad[i].main == val){
+        if(this.ad[i].main == val){                 // If main already exists
           alert('already exists');
           return;
         }
       }
+
       this.ad.push({ main: val, sub:[val]})
-      // this.activeAdMain(row, e)
+
       if(row){
-        if(idx + 1){
-          this.updateCase('main', row, val, idx)
-        }else{
-          this.addNewCase('ad', row.id, val)
-        }
+        this.updateCase('main', row, val)
       }else{
         // this.activeAdMain(row, e)
         this.addNewBox('ad', this.prev_row_id, val)
@@ -429,14 +430,17 @@ const app = new Vue({
       let box = this.box(row.id)
       
       if(type=='main'){
-        for(let i = 0, l = box.cases.length; i < l; i++){
-          let branch = box.cases[i]
-          if(branch.content[0] == val && (branch.content[1] == val)) {
-            alert('already exists')
-            return
+        if(box.cases[0].content[0] != val){
+          if(confirm('Did you change Main?')){
+            let nexts = box.cases.filter(i => i.content[1] != this.activeCases[row.id]).map(i =>i.next)
+            next = box.cases.find(i => i.content[1] == this.activeCases[row.id]).next
+            box.cases = [{content: [val, val], next: next}]
+            this.activeCases[row.id] = val
+            for(i in nexts){
+              this.deleteBox(nexts[i])
+            }
           }
         }
-        box.cases[idx].content = [val, val]
       }else if(type=='sub'){
         for(let i = 0, l = box.cases.length; i < l; i++){
           let branch = box.cases[i]
@@ -446,6 +450,7 @@ const app = new Vue({
           }
         }
         box.cases[idx].content[1] = val
+        this.activeCases[row.id] = val
       }
       this.renderKey++
     },
@@ -453,20 +458,23 @@ const app = new Vue({
     addAdSub(row, main, e, idx){
       isChange = true
       let val = e.target.value
-      let subs = this.ad
-          .find(element => element.main == main)
-          .sub
+      let subs = this.ad_subs(main)
+          
       for(let i=0, l=subs.length; i<l; i++){
         if(subs[i] == val) {
           alert('already exists');
           return;
         }
       }
+
       this.ad
           .find(element => element.main == main)
           .sub.push(val)
-      this.updateCase('sub', row, val, idx)
-      // this.activeAdSub(row, e)
+      if(idx + 1){
+        this.updateCase('sub', row, val, idx)
+      }else{
+        this.addNewCase('ad', row.id, e.target.value)
+      }
     },
 
     deleteAdMain(main){
@@ -571,8 +579,8 @@ const app = new Vue({
 
         let filename = event.target.files[0].name
 
-      if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
-        alert('Correct File Name')
+      if(!/^[a-zA-Z0-9-_]+$/.test(filename.split('.')[0])){
+        alert('File name is wrong. File name should include only alphabet letters, digits, and underline (_)')
         return false
       }
       
@@ -615,13 +623,15 @@ const app = new Vue({
     updateScript(row, event) {
       isChange = true
         if(event.target.files[0].size > 100000){
+          event.target.value = null
             alert('File Size should smaller than 100KB')
             return false;
         }
         let filename = event.target.files[0].name
 
-      if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
-        alert('Correct File Name')
+      if(!/^[a-zA-Z0-9-_]+$/.test(filename.split('.')[0])){
+        event.target.value = null
+        alert('File name is wrong. File name should include only alphabet letters, digits, and underline (_)')
         return false
       }
         const reader = new FileReader();
@@ -701,7 +711,7 @@ const app = new Vue({
   },
 });
 
-jQuery(document).click(function (e) {
+jQuery(document).blur(function (e) {
   if (!jQuery(e.target).is(".dropList") && jQuery(e.target).parents(".dropList").length === 0 && !jQuery(e.target).next().is(".dropList") && !jQuery(e.target).parent().next().is(".dropList")) 
   {
       jQuery(".dropList").toArray().forEach( element => element.style.visibility = 'hidden')
@@ -718,8 +728,9 @@ if(event.target.files[0].size > 1000000){
 
 let filename = event.target.files[0].name
 
-if(!/^[a-zA-Z0-9-_]+$/.test(filename)){
-      alert('Correct File Name')
+if(!/^[a-zA-Z0-9-_]+$/.test(filename.split('.')[0])){
+  event.target.value = null
+      alert('File name is wrong. File name should include only alphabet letters, digits, and underline (_)')
       return false
     }
 

@@ -329,13 +329,17 @@ input.listItem{
     background-color: #fe5500;
 }
 
+.bg-eb-secondary{
+    background-color: #693921;
+}
+
 .arrow-end:after{
     position:absolute;
     right: 0.25em;
     top: 1em;
 }
 
-.ctrl-btn-wrapper .ctrl-btn{ display: none; white-space: nowrap;}
+.ctrl-btn-wrapper .ctrl-btn{ display: none; white-space: nowrap; z-index:10;}
 .ctrl-btn-wrapper:hover .ctrl-btn{ display: block; }
 
 .ctrl-btn i{ color: white; cursor: pointer;}
