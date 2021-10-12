@@ -84,7 +84,7 @@ const app = new Vue({
                 ad_case.next = this.id
             }else{
               prev_box.cases.push({
-                  content: [this.activeCases[prev_box.id][0], this.activeCases[prev_box.id][1]],
+                  content: [prev_box.cases[0].content[0], this.activeCases[prev_box.id]],
                   next: this.id
               })
 
@@ -419,21 +419,21 @@ const app = new Vue({
       this.ad.push({ main: val, sub:[val]})
 
       if(row){
-        this.updateCase('main', row, val)
+        this.activeAd('main', row, val)
       }else{
         // this.activeAdMain(row, e)
         this.addNewBox('ad', this.prev_row_id, val)
       }
     },
 
-    updateCase(type, row, val, idx){
+    activeAd(type, row, val){
       let box = this.box(row.id)
       
       if(type=='main'){
         if(box.cases[0].content[0] != val){
-          if(confirm('Did you change Main?')){
-            let nexts = box.cases.filter(i => i.content[1] != this.activeCases[row.id]).map(i =>i.next)
-            next = box.cases.find(i => i.content[1] == this.activeCases[row.id]).next
+          if(confirm('Would you change Main?')){
+            let nexts = box.cases.map(i =>i.next).slice(1)
+            next = box.cases[0].next
             box.cases = [{content: [val, val], next: next}]
             this.activeCases[row.id] = val
             for(i in nexts){
@@ -442,20 +442,16 @@ const app = new Vue({
           }
         }
       }else if(type=='sub'){
-        for(let i = 0, l = box.cases.length; i < l; i++){
-          let branch = box.cases[i]
-          if(branch.content[0] == box.cases[idx]['content'][0] && (branch.content[1] == val)) {
-            alert('already exists')
-            return
-          }
+        if(box.cases[0].content[0] == box.cases[0].content[1] || (box.cases.length == 1 && ( box.cases[0].next == 0))){
+            box.cases[0].content[1] = val
         }
-        box.cases[idx].content[1] = val
+
         this.activeCases[row.id] = val
       }
       this.renderKey++
     },
 
-    addAdSub(row, main, e, idx){
+    addAdSub(row, main, e){
       isChange = true
       let val = e.target.value
       let subs = this.ad_subs(main)
@@ -470,11 +466,9 @@ const app = new Vue({
       this.ad
           .find(element => element.main == main)
           .sub.push(val)
-      if(idx + 1){
-        this.updateCase('sub', row, val, idx)
-      }else{
-        this.addNewCase('ad', row.id, e.target.value)
-      }
+
+      this.activeAd('sub', row, val)
+      
     },
 
     deleteAdMain(main){

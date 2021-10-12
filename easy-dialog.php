@@ -287,7 +287,7 @@
                                     <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event)" placeholder="Add New ..."></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li v-for="main in ad_mains()">
-                                      <span class="dropdown-item" @click="updateCase('main', row, main)">{{main}}</span>
+                                      <span class="dropdown-item" @click="activeAd('main', row, main)">{{main}}</span>
                                     </li>
                                   </ul>
                                 </div>
@@ -317,42 +317,20 @@
                                 </div>
                             </div>
                             <div class="col-6 p-1">
-                              <div class="mb-1 position-relative ctrl-btn-wrapper"
-                                v-for="(i, idx) in box(row.id).cases"
-                              >
                                 <div class="btn-group d-grid">
-                                  <button type="button" :class="'btn dropdown-toggle text-white text-start arrow-end bg-eb-' + (activeCases[row.id]==i.content[1] ? 'primary' : 'secondary')" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ i.content[1] }}
+                                  <button type="button" class="btn dropdown-toggle text-white text-start arrow-end bg-eb-primary" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ activeCases[row.id] }}
                                   </button>
                                   <ul class="dropdown-menu">
-                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, i.content[0], $event, idx)" placeholder="Add New ..."></li>
+                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, box(row.id).cases[0].content[0], $event)" placeholder="Add New ..."></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li v-for="sub in ad_subs(i.content[0])">
-                                      <span class="dropdown-item" @click="updateCase('sub',row, sub, idx)">{{ sub }}</span>
+                                    <li v-for="sub in ad_subs(box(row.id).cases[0].content[0])">
+                                      <span class="dropdown-item mb-1" :class="box(row.id).cases.map(i => i.content[1]).includes(sub) ? 'bg-eb-primary' : ''" @click="activeAd('sub', row, sub)">{{ sub }}</span>
                                     </li>
                                   </ul>
                                 </div>
-                                <div class="position-absolute top-50 end-100 translate-middle-y p-1 ctrl-btn">
-                                  <div class="bg-dark bg-opacity-25 rounded p-1">
-                                    <i class="fa fa-check" title="Active" @click="activeCase(row, i.content[1])"></i>
-                                    <i class="fa fa-times" title="Delete" 
-                                      @click.stop.prevent="deleteCase(row, (i.content[1] == activeCases[row.id]), idx)"
-                                    ></i>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="btn-group d-grid">
-                                <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Select Sub
-                                </button>
-                                <ul class="dropdown-menu">
-                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, main(row), $event, -1)" placeholder="Add New ..."></li>
-                                  <li><hr class="dropdown-divider"></li>
-                                  <li v-for="i in ad_subs(main(row))">
-                                    <span class="dropdown-item" @click="addNewCase('ad', row.id, i)">{{i}}</span>
-                                  </li>
-                                </ul>
-                              </div>
+                                
+                              
                             </div>
                           </div>
                         </div>
