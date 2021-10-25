@@ -946,6 +946,17 @@ if(!jQuery("#loadBot").val()) {
                         isBuild = true
                         isChange = false
                         let data = res.data
+                        if(data.hs_active){
+                          data.activeCases = {
+                            ...data.hs_active,
+                            ...data.ad_active,
+                          }
+                        }
+                        for(const property in data.activeCases){
+                          if(Array.isArray(data.activeCases[property])){
+                            data.activeCases[property] = data.activeCases[property][1]
+                          }
+                        }
                         app.setBox(data)
                       }else{
                           alert("Something is wrong!"); 
