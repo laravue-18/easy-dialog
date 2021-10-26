@@ -158,7 +158,7 @@
                           <div class="row g-0">
                             <div class="col-6 p-1">
                               <div class="btn-group d-grid">
-                                <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
                                   Select Main
                                 </button>
                                 <ul class="dropdown-menu">
@@ -188,6 +188,9 @@
                   <div class="rowBody">
                     <template v-if="row.action == 'hs'">
                       <div class="asBox">
+                        <div class="d-none">
+                          <div class="btn btn-primary btn-sm">{{ row.id }}</div>
+                        </div>
                         <div 
                           v-for="(i, idx) in box(row.id).cases"
                           class="hsCase" 
@@ -262,6 +265,39 @@
                         >
                           Remove Image
                         </button>
+                        <div v-if = "!nexting" class="d-none">
+                          <button
+                            style="
+                              margin: 3px;
+                              padding: 5px 10px;
+                              border-radius: 9999px;
+                              height: 2.2em;"
+                            data-bs-toggle="modal" data-bs-target="#exampleModal"
+                          >
+                            Choose Next Step
+                          </button>
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <select name="" id="" class="form-control">
+                                    <option v-for="row in rows()" value="row.id">{{ row.id }}</option>
+                                  </select>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                  <button type="button" class="btn btn-primary" @click="setNext">Save changes</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         <div v-if="ases().length" class="dropList">
                           <template v-for="i in ases()">
                             <div class="adItem">
@@ -280,7 +316,7 @@
                           <div class="row g-0">
                             <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ main(row) }}
                                   </button>
                                   <ul class="dropdown-menu">
@@ -318,14 +354,21 @@
                             </div>
                             <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn dropdown-toggle text-white text-start arrow-end bg-eb-primary" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button type="button" class="btn dropdown-toggle text-white text-start arrow-end bg-eb-primary btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ activeCases[row.id] }}
                                   </button>
                                   <ul class="dropdown-menu">
                                     <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, box(row.id).cases[0].content[0], $event)" placeholder="Add New ..."></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li v-for="sub in ad_subs(box(row.id).cases[0].content[0])">
-                                      <span class="dropdown-item mb-1" :class="box(row.id).cases.map(i => i.content[1]).includes(sub) ? 'bg-eb-primary' : ''" @click="activeAd('sub', row, sub)">{{ sub }}</span>
+                                      <span class="dropdown-item mb-1 d-flex justify-content-between" :class="box(row.id).cases.map(i => i.content[1]).includes(sub) ? 'bg-eb-primary' : ''" @click="activeAd('sub', row, sub)">
+                                        <span>{{ sub }}</span>
+                                        <template v-if="box(row.id).cases.map(i => i.content[1]).includes(sub)">
+                                          <span
+                                            @click.stop="deleteCase(row, sub == activeCases[row.id], box(row.id).cases.map(i => i.content[1]).indexOf(sub))"
+                                          >×</span>
+                                        </template>
+                                      </span>
                                     </li>
                                   </ul>
                                 </div>
@@ -366,7 +409,7 @@
                             <div class="row g-0">
                               <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
                                     Select Main
                                   </button>
                                   <ul class="dropdown-menu">
@@ -418,7 +461,7 @@
                         >
                           <div class="col-6 p-1">
                             <div class="btn-group d-grid">
-                              <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end" data-bs-toggle="dropdown" aria-expanded="false">
+                              <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
                                 Select Main
                               </button>
                               <ul class="dropdown-menu">

@@ -50,7 +50,8 @@ const app = new Vue({
       text: '',
       activeCases:{},
       clicks: 0,
-      renderKey: 0    
+      renderKey: 0,
+      nexting: null,    
     }
   },
   computed:{
@@ -317,7 +318,7 @@ const app = new Vue({
       
       let {id, action, next} = row
       
-       if(this.box(id).cases.length - 1){
+      if(this.box(id).cases.length - 1){
         let next = this.box(id).cases[idx].next;
         this.box(id).cases.splice(idx, 1);
         flag && ( this.activeCases[id] = this.box(id).cases[0].content ) ;
@@ -325,20 +326,34 @@ const app = new Vue({
       }else if(id == 1){
         this.boxes = []
         this.id = 1
-      }else if(confirm("Delete Only This Step?")){
-          let box = this.box(this.rows().find(i => i.next == id).id)
-
-          if(box.action == 'as'){
-            box.cases[0].next = next
-          }else{
-            this.getCase(box.cases, this.activeCases[box.id]).next = next
-          }
-
-          let idx = this.boxes.findIndex(e => e.id == id)
-          this.boxes.splice(idx, 1)
       }else{
-        this.prevReset(id)
-        this.deleteBox(id)
+        swal("what should I delete?", {
+          buttons: {
+            cancel: "This step and dependent flows all",
+            defeat: "Only this step",
+          },
+        })
+        .then((value) => {
+          switch (value) {
+         
+            case "defeat":
+              let box = this.box(this.rows().find(i => i.next == id).id)
+
+              if(box.action == 'as'){
+                box.cases[0].next = next
+              }else{
+                this.getCase(box.cases, this.activeCases[box.id]).next = next
+              }
+
+              let idx = this.boxes.findIndex(e => e.id == id)
+              this.boxes.splice(idx, 1)
+              break;
+         
+            default:
+              this.prevReset(id)
+              this.deleteBox(id)
+          }
+        });
       }
     },
     
@@ -701,6 +716,9 @@ const app = new Vue({
           }
         }
       });
+    },
+    setNext(){
+      
     }
   },
 });
