@@ -366,6 +366,7 @@
                                         <template v-if="box(row.id).cases.map(i => i.content[1]).includes(sub)">
                                           <span
                                             @click.stop="deleteCase(row, sub == activeCases[row.id], box(row.id).cases.map(i => i.content[1]).indexOf(sub))"
+                                            style="cursor: pointer;"
                                           >×</span>
                                         </template>
                                       </span>

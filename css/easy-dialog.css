@@ -16,6 +16,10 @@ body{
     height: auto;
 }
 
+.swal-modal{
+    width: auto;
+}
+
 #overlay{ 
     position: fixed;
     top: 0;

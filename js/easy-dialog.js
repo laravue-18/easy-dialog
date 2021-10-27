@@ -329,14 +329,21 @@ const app = new Vue({
       }else{
         swal("what should I delete?", {
           buttons: {
-            cancel: "This step and dependent flows all",
-            defeat: "Only this step",
+            cancel: "Cancel",
+            all: {
+              text: "This step and dependent flows all",
+              value: "all",
+            },
+            one: {
+              text: "Only this step",
+              value: "one"
+            }
           },
         })
         .then((value) => {
           switch (value) {
          
-            case "defeat":
+            case "one":
               let box = this.box(this.rows().find(i => i.next == id).id)
 
               if(box.action == 'as'){
@@ -349,9 +356,13 @@ const app = new Vue({
               this.boxes.splice(idx, 1)
               break;
          
-            default:
+            case "all":
               this.prevReset(id)
               this.deleteBox(id)
+              break;
+
+            default:
+              console.log('canceled')
           }
         });
       }
