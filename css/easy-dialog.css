@@ -354,6 +354,9 @@ input.listItem{
     right: 0.25em;
     top: 1em;
 }
+.arrow-none:after{
+    visibility: hidden;
+}
 
 .ctrl-btn-wrapper .ctrl-btn{ display: none; white-space: nowrap; z-index:10;}
 .ctrl-btn-wrapper:hover .ctrl-btn{ display: block; }

@@ -497,47 +497,95 @@ const app = new Vue({
       
     },
 
-    deleteAdMain(main){
+    deleteStep(row){
       let r = confirm('Really Delete?')
       if(!r) return
 
-      isChange = true
+      let {id, action, next} = row
 
-      this.ad = this.ad.filter( e => e.main != main)
-
-      let i = this.boxes.length
-      while(i--){
-        let box = this.boxes[i]
-        if(box.action == "ad"){
-          let j = box.cases.length
-          while(j--){
-            if(box.cases[j].content[0] == main){
-              let next = box.cases[j].next
-              box.cases.splice(j, 1)
-              this.deleteBox(next)
+      if(id == 1){
+        this.boxes = []
+        this.id = 1
+      }else{
+        swal("what should I delete?", {
+          buttons: {
+            cancel: "Cancel",
+            all: {
+              text: "This step and dependent flows all",
+              value: "all",
+            },
+            one: {
+              text: "Only this step",
+              value: "one"
             }
-          }
-          if(!box.cases.length){
-            if(box.id != 1){
-              let boxes = this.boxes
-              let k = boxes.length
-              while(k--){
-                let b = boxes[k]
-                let l = b.cases.length
-                while(l--){
-                  if(b.cases[l].next == box.id) b.cases[l].next = 0
-                }
+          },
+        })
+        .then((value) => {
+          switch (value) {
+         
+            case "one":
+              let box = this.box(this.rows().find(i => i.next == id).id)
+
+              if(box.action == 'as'){
+                box.cases[0].next = next
+              }else{
+                this.getCase(box.cases, this.activeCases[box.id]).next = next
               }
-              this.boxes.splice(i, 1)
-            }else{
-              this.boxes = []
-              this.id = 1
-            }
-          }else{
-            this.activeCases[box.id] = box.cases[0].content
+
+              let idx = this.box(id).cases.findIndex(e => e.next == next)
+              this.box(id).cases.splice(idx, 1)
+              this.deleteBox(id)
+
+              // let idx = this.boxes.findIndex(e => e.id == id)
+              // this.boxes.splice(idx, 1)
+              break;
+         
+            case "all":
+              this.prevReset(id)
+              this.deleteBox(id)
+              break;
+
+            default:
+              console.log('canceled')
           }
-        }
+        });
       }
+
+      // this.ad = this.ad.filter( e => e.main != main)
+
+      // let i = this.boxes.length
+      // while(i--){
+      //   let box = this.boxes[i]
+      //   if(box.action == "ad"){
+      //     let j = box.cases.length
+      //     while(j--){
+      //       if(box.cases[j].content[0] == main){
+      //         let next = box.cases[j].next
+      //         box.cases.splice(j, 1)
+      //         this.deleteBox(next)
+      //       }
+      //     }
+      //     if(!box.cases.length){
+      //       if(box.id != 1){
+      //         let boxes = this.boxes
+      //         let k = boxes.length
+      //         while(k--){
+      //           let b = boxes[k]
+      //           let l = b.cases.length
+      //           while(l--){
+      //             if(b.cases[l].next == box.id) b.cases[l].next = 0
+      //           }
+      //         }
+      //         this.boxes.splice(i, 1)
+      //       }else{
+      //         this.boxes = []
+      //         this.id = 1
+      //       }
+      //     }else{
+      //       this.activeCases[box.id] = box.cases[0].content
+      //     }
+      //   }
+      // }
     },
 
     deleteAdSub(main, sub){

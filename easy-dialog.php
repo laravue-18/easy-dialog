@@ -316,9 +316,14 @@
                           <div class="row g-0">
                             <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-none btn-sm " data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ main(row) }}
                                   </button>
+                                  <span
+                                      @click.stop="deleteStep(row)"
+                                      style="cursor: pointer;right: 0.25em; top: 0.25em; color: white; z-index: 2;"
+                                      class="position-absolute"
+                                  >×</span>
                                   <ul class="dropdown-menu">
                                     <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event)" placeholder="Add New ..."></li>
                                     <li><hr class="dropdown-divider"></li>
