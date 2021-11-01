@@ -188,7 +188,7 @@
                   <div class="rowBody">
                     <template v-if="row.action == 'hs'">
                       <div class="asBox">
-                        <div class="d-none">
+                        <div class="">
                           <div class="btn btn-primary btn-sm">{{ row.id }}</div>
                         </div>
                         <div 
@@ -265,7 +265,7 @@
                         >
                           Remove Image
                         </button>
-                        <div v-if = "!nexting" class="d-none">
+                        <div v-if = "!nexting" class="">
                           <button
                             style="
                               margin: 3px;

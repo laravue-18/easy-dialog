@@ -106,7 +106,7 @@ const app = new Vue({
           box.cases[0].next = 0
       }else{
           box.cases
-            .find(i => i.content[0] == this.activeCases[box.id][0] && i.content[1] == this.activeCases[box.id][1])
+            .find(i => i.content[0] == this.activeCases[box.id][0] && i.content[1] == this.activeCases[box.id])
             .next = 0
       }
     },
@@ -187,9 +187,7 @@ const app = new Vue({
     },
     
     getCase(arr, val){
-      if(Array.isArray(val) && val.length == 2)
-      return arr.find(i => (i.content[0] == val[0] && (i.content[1] == val[1])))
-      return arr.find(i => i.content == val)
+      return arr.find(i => i.content[i.content.length - 1] == val)
     },
 
     addNewBox(action, prev_row_id, val){
@@ -321,7 +319,7 @@ const app = new Vue({
       if(this.box(id).cases.length - 1){
         let next = this.box(id).cases[idx].next;
         this.box(id).cases.splice(idx, 1);
-        flag && ( this.activeCases[id] = this.box(id).cases[0].content ) ;
+        flag && ( this.activeCases[id] = this.box(id).cases[0].content[this.box(id).cases[0].content.length - 1] ) ;
         this.deleteBox(next)
       }else if(id == 1){
         this.boxes = []
