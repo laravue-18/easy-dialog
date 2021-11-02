@@ -187,7 +187,9 @@ const app = new Vue({
     },
     
     getCase(arr, val){
-      return arr.find(i => i.content[i.content.length - 1] == val)
+      if(Array.isArray(val) && val.length == 2)
+        return arr.find(i => (i.content[1] == val))
+      return arr.find(i => i.content == val)
     },
 
     addNewBox(action, prev_row_id, val){
