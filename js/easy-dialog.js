@@ -187,9 +187,7 @@ const app = new Vue({
     },
     
     getCase(arr, val){
-      if(Array.isArray(val) && val.length == 2)
-        return arr.find(i => (i.content[1] == val))
-      return arr.find(i => i.content == val)
+      return arr.find(i => Array.isArray(i.content) ? i.content[1] == val : i.content == val)
     },
 
     addNewBox(action, prev_row_id, val){
@@ -314,18 +312,36 @@ const app = new Vue({
     },
     
     deleteCase(row, flag, idx){
-      if(!confirm("Really Delete?")) return
-      
+
       let {id, action, next} = row
       
       if(this.box(id).cases.length - 1){
-        let next = this.box(id).cases[idx].next;
-        this.box(id).cases.splice(idx, 1);
-        flag && ( this.activeCases[id] = this.box(id).cases[0].content[this.box(id).cases[0].content.length - 1] ) ;
-        this.deleteBox(next)
+        swal("This will deletes this step and the connected flow. Proceed?", {
+          buttons: ['Cancel', true]
+        })
+        .then((val) => {
+          if(val){
+            let next = this.box(id).cases[idx].next;
+            this.box(id).cases.splice(idx, 1);
+            if(flag){
+              let content = this.box(id).cases[0].content;
+              let active = Array.isArray(content) ? content[1] : content
+              this.activeCases[id] = active  ;
+            }
+            this.deleteBox(next)
+          }
+        })
       }else if(id == 1){
-        this.boxes = []
-        this.id = 1
+        swal("This will deletes all data. Proceed?", {
+          buttons: ['Cancel', true]
+        })
+        .then((val) => {
+          if(val){
+            this.boxes = []
+            this.id = 1
+          }
+        })
+        
       }else{
         swal("what should I delete?", {
           buttons: {
@@ -366,6 +382,8 @@ const app = new Vue({
           }
         });
       }
+
+      this.renderKey++ ; 
     },
     
     changeHsCase(row, i ,e){
@@ -498,14 +516,18 @@ const app = new Vue({
     },
 
     deleteStep(row){
-      let r = confirm('Really Delete?')
-      if(!r) return
-
       let {id, action, next} = row
 
       if(id == 1){
-        this.boxes = []
-        this.id = 1
+        swal("This will deletes all data. Proceed?", {
+          buttons: ['Cancel', true]
+        })
+        .then((val) => {
+          if(val){
+            this.boxes = []
+            this.id = 1
+          }
+        })
       }else{
         swal("what should I delete?", {
           buttons: {
@@ -589,7 +611,7 @@ const app = new Vue({
     },
 
     deleteAdSub(main, sub){
-        let r = confirm('Really Delete?');
+        let r = confirm("This will deletes this step and the connected flow. Proceed?" );
       if(!r) return
       
       isChange = true
