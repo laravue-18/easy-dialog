@@ -256,6 +256,7 @@ input{
     width: 45%;
     margin-right: 1%;
     display: inline-flex;
+    align-items: center;
     color: white;
     padding: 0 5px;
     margin: 1px;
@@ -363,3 +364,16 @@ input.listItem{
 
 .ctrl-btn i{ color: white; cursor: pointer;}
 .ctrl-btn i:hover{ color: black;}
+
+.swal-text{
+    color: #000 !important;
+}
+.swal-button{
+    background-color: #c84707;
+}
+.swal-button:hover{
+    background-color: #fe5500 !important;
+}
+.swal-button--cancel{
+    background: lightgrey;
+}

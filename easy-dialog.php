@@ -204,6 +204,7 @@
                             @dblclick="changeHsCase(row, i, $event)"
                             readonly
                           >
+                          <i class="fas fa-edit" @click="showEditModal(row, idx, i.content)" style="font-size: .75rem;"></i>
                           <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == activeCases[row.id], idx)">×</span>
                         </div>
                         <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addNewCase('hs', row.id, $event)">
@@ -487,7 +488,28 @@
                 </div>
               </template>
             </div>
+            <!-- Modal -->
+            <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form action="" @submit.stop.prevent="updateCase">
+                      <textarea rows="3" class="form-control" v-model.lazy="edit_text"></textarea>
+                    </form>
+                  </div>
+                  
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="updateCase" data-bs-dismiss="modal">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+          
         </section>
 
         <footer class="alexa-footer">

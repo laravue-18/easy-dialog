@@ -49,6 +49,11 @@ const app = new Vue({
       id: 1,
       text: '',
       activeCases:{},
+
+      edit_text: '',
+      edit_box: null,
+      edit_idx: null,
+
       clicks: 0,
       renderKey: 0,
       nexting: null,    
@@ -135,6 +140,15 @@ const app = new Vue({
           this.boxes.splice(idx, 1)
           list.forEach(id => this.deleteBox(id))
       }
+    },
+
+    showEditModal(row, idx, text){
+      this.edit_box = row.id
+      this.edit_idx = idx
+      this.edit_text = text
+      
+      let myModal = new bootstrap.Modal(document.getElementById('editModal'), {focus: true})
+      myModal.show()
     },
 
     rows(){
@@ -384,6 +398,16 @@ const app = new Vue({
       }
 
       this.renderKey++ ; 
+    },
+
+    updateCase(){
+      let myModal = new bootstrap.Modal(document.getElementById('editModal'))
+      myModal.hide()
+      
+      box = this.box(this.edit_box)
+      box.cases[this.edit_idx].content = this.edit_text
+      this.activeCases[this.edit_box] = this.edit_text
+
     },
     
     changeHsCase(row, i ,e){
