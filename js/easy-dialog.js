@@ -321,8 +321,10 @@ const app = new Vue({
     },
 
     activeCase(row, i){
-          this.activeCases[row.id] = i
-          this.renderKey++
+      if(this.activeCases[row.id] != i){
+        this.activeCases[row.id] = i
+        this.renderKey++
+      }
     },
     
     deleteCase(row, flag, idx){
@@ -415,7 +417,7 @@ const app = new Vue({
       // e.target.readOnly = true
       let el = jQuery('<textarea rows="3">' + e.target.value + '</textarea>')
       el.css({position: 'absolute', top: '105%', left: 0, background: '#FFF', width: '100%', color: '#000', zIndex: 2})
-      el.on('change blur', function(e){
+      el.on('change blur', function(){
         isChange = true
         i.content = jQuery(this).val()
         app.activeCases[row.id] = i.content
@@ -427,7 +429,7 @@ const app = new Vue({
               jQuery(this).trigger('change')
           }
       });
-      jQuery(e.target).after(el)
+      jQuery(e.target).next().after(el)
       el.focus()
     },
     
