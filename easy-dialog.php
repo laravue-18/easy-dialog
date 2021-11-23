@@ -247,6 +247,7 @@
                           ref="photo"
                           style="visibility:hidden; height: 0;"
                           @blur="updatePhotoPreview(row, $event)"
+                          @change="updatePhotoPreview(row, $event)"
                         >
                         <button
                           @click="selectNewPhoto"

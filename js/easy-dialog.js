@@ -693,12 +693,12 @@ const app = new Vue({
     updatePhotoPreview(row, event) {
       isChange = true
       
-        if(event.target.files[0].size > 1000000){
-            alert('File Size should smaller than 1M')
-            return false;
-        }
+      if(event.target.files[0].size > 1000000){
+          alert('File Size should smaller than 1M')
+          return false;
+      }
 
-        let filename = event.target.files[0].name
+      let filename = event.target.files[0].name
 
       if(!/^[a-zA-Z0-9-_]+$/.test(filename.split('.')[0])){
         alert('File name is wrong. File name should include only alphabet letters, digits, and underline (_)')
