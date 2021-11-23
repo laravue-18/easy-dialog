@@ -57,6 +57,7 @@ const app = new Vue({
       clicks: 0,
       renderKey: 0,
       nexting: null,    
+      next: 0,
     }
   },
   computed:{
@@ -172,11 +173,15 @@ const app = new Vue({
               this.boxes = []
               this.id = 1
           }
-          rows.push({
-              id: box.id,
-              action: box.action,
-              next: box_id
-          })
+          if(!rows.map(i => i.id).includes(box.id)){
+            rows.push({
+                id: box.id,
+                action: box.action,
+                next: box_id
+            })
+          }else{
+            break;
+          }
       }
       return rows;
     },
@@ -501,7 +506,7 @@ const app = new Vue({
       
       if(type=='main'){
         if(box.cases[0].content[0] != val){
-          if(confirm('Would you change Main?')){
+          if(confirm('Do you want to change the name of the main library?')){
             let nexts = box.cases.map(i =>i.next).slice(1)
             next = box.cases[0].next
             box.cases = [{content: [val, val], next: next}]
@@ -824,8 +829,12 @@ const app = new Vue({
         }
       });
     },
-    setNext(){
-      
+    setNext(id){
+      $('#nextStepModal').modal('hide')
+      $('#nextStepModal').on('hidden.bs.modal', function (e) {
+        app.box(id).cases[0].next = app.next
+        app.next = 0
+      })
     }
   },
 });

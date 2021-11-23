@@ -188,7 +188,7 @@
                   <div class="rowBody">
                     <template v-if="row.action == 'hs'">
                       <div class="asBox">
-                        <div class="">
+                        <div>
                           <div class="btn btn-primary btn-sm">{{ row.id }}</div>
                         </div>
                         <div 
@@ -214,6 +214,9 @@
                     <template v-else-if="row.action == 'as'">
                       <div class="asBox"></div>
                       <div class="asBox">
+                        <div>
+                          <div class="btn btn-primary btn-sm">{{ row.id }}</div>
+                        </div>
                         <div class="asCase" @click="adClick">
                             <input class="listItem"
                                 type="text" 
@@ -265,38 +268,44 @@
                         >
                           Remove Image
                         </button>
-                        <div v-if = "!nexting" class="">
-                          <button
-                            style="
-                              margin: 3px;
-                              padding: 5px 10px;
-                              border-radius: 9999px;
-                              height: 2.2em;"
-                            data-bs-toggle="modal" data-bs-target="#exampleModal"
-                          >
-                            Choose Next Step
-                          </button>
+                        <div v-if = "rows().length == index + 1" class="">
+                          <template v-if = "!row.next">
+                            <button
+                              style="
+                                margin: 3px;
+                                padding: 5px 10px;
+                                border-radius: 9999px;
+                                height: 2.2em;"
+                              data-bs-toggle="modal" data-bs-target="#nextStepModal"
+                            >
+                              Choose Next Step
+                            </button>
 
-                          <!-- Modal -->
-                          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="exampleModalLabel">Select</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                  <select name="" id="" class="form-control">
-                                    <option v-for="row in rows()" value="row.id">{{ row.id }}</option>
-                                  </select>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                  <button type="button" class="btn btn-primary" @click="setNext">Save changes</button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <select class="form-control" v-model="next">
+                                      <option value="0">Select Id of Next Step</option>
+                                      <option v-for="row in rows()" :value="row.id">{{ row.id }}</option>
+                                    </select>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" @click="setNext(row.id)">Save changes</button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </template>
+                          <template v-else>
+                            <button class="btn btn-warning btn-sm">Next Step is {{ row.next }} .</button>
+                          </template>
                         </div>
                         <div v-if="ases().length" class="dropList">
                           <template v-for="i in ases()">
@@ -312,7 +321,9 @@
                         <div class="asBox"></div>
                         <div class="asBox"></div>
                         <div class="asBox">
-                          <!-- new -->
+                          <div>
+                            <div class="btn btn-primary btn-sm">{{ row.id }}</div>
+                          </div>
                           <div class="row g-0">
                             <div class="col-6 p-1">
                                 <div class="btn-group d-grid">
@@ -436,7 +447,7 @@
                   </div>
                 </template>
               </template>
-              <template v-if="!(insert + 1)">
+              <template v-if="!(insert + 1) && !(rows().length  && rows()[rows().length -1].next)">
                 <div class="asRow">
                   <div class="rowNumber">
                     <input type="text" :value="rows().length + 1">
