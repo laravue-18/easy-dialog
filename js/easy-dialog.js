@@ -830,8 +830,8 @@ const app = new Vue({
       });
     },
     setNext(id){
-      $('#nextStepModal').modal('hide')
-      $('#nextStepModal').on('hidden.bs.modal', function (e) {
+      jQuery('#nextStepModal').modal('hide')
+      jQuery('#nextStepModal').on('hidden.bs.modal', function (e) {
         app.box(id).cases[0].next = app.next
         app.next = 0
       })
