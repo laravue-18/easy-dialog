@@ -384,6 +384,7 @@ const app = new Vue({
               if(id == 1){
                 let idx = this.boxes.findIndex(e => e.id == id)
                 this.boxes.splice(idx, 1)
+                if(this.activeCases[next]) this.activeCases[1] = this.activeCases[next]
                 this.box(next).id = 1
               }else{
                 let box = this.box(this.rows().find(i => i.next == id).id)
@@ -592,6 +593,7 @@ const app = new Vue({
                 let idx = this.box(id).cases.findIndex(e => e.next == next)
                 this.box(id).cases.splice(idx, 1)
                 this.deleteBox(id)
+                if(this.activeCases[next]) this.activeCases[1] = this.activeCases[next]
                 this.box(next).id = 1
               }else{
                 let box = this.box(this.rows().find(i => i.next == id).id)
