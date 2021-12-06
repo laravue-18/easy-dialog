@@ -352,8 +352,8 @@ const app = new Vue({
             this.deleteBox(next)
           }
         })
-      }else if(id == 1){
-        swal("This will deletes all data. Proceed?", {
+      }else if(this.boxes.length == 1){
+        swal("This will deletes data. Proceed?", {
           buttons: ['Cancel', true]
         })
         .then((val) => {
@@ -381,21 +381,32 @@ const app = new Vue({
           switch (value) {
          
             case "one":
-              let box = this.box(this.rows().find(i => i.next == id).id)
-
-              if(box.action == 'as'){
-                box.cases[0].next = next
+              if(id == 1){
+                let idx = this.boxes.findIndex(e => e.id == id)
+                this.boxes.splice(idx, 1)
+                this.box(next).id = 1
               }else{
-                this.getCase(box.cases, this.activeCases[box.id]).next = next
+                let box = this.box(this.rows().find(i => i.next == id).id)
+  
+                if(box.action == 'as'){
+                  box.cases[0].next = next
+                }else{
+                  this.getCase(box.cases, this.activeCases[box.id]).next = next
+                }
+  
+                let idx = this.boxes.findIndex(e => e.id == id)
+                this.boxes.splice(idx, 1)
               }
-
-              let idx = this.boxes.findIndex(e => e.id == id)
-              this.boxes.splice(idx, 1)
               break;
          
             case "all":
-              this.prevReset(id)
-              this.deleteBox(id)
+              if(id == 1){
+                this.boxes = []
+                this.id = 1
+              }else{
+                this.prevReset(id)
+                this.deleteBox(id)
+              }
               break;
 
             default:
@@ -549,8 +560,8 @@ const app = new Vue({
     deleteStep(row){
       let {id, action, next} = row
 
-      if(id == 1){
-        swal("This will deletes all data. Proceed?", {
+      if(this.boxes.length == 1){
+        swal("This will deletes data. Proceed?", {
           buttons: ['Cancel', true]
         })
         .then((val) => {
@@ -577,25 +588,37 @@ const app = new Vue({
           switch (value) {
          
             case "one":
-              let box = this.box(this.rows().find(i => i.next == id).id)
-
-              if(box.action == 'as'){
-                box.cases[0].next = next
+              if(id == 1){
+                let idx = this.box(id).cases.findIndex(e => e.next == next)
+                this.box(id).cases.splice(idx, 1)
+                this.deleteBox(id)
+                this.box(next).id = 1
               }else{
-                this.getCase(box.cases, this.activeCases[box.id]).next = next
+                let box = this.box(this.rows().find(i => i.next == id).id)
+  
+                if(box.action == 'as'){
+                  box.cases[0].next = next
+                }else{
+                  this.getCase(box.cases, this.activeCases[box.id]).next = next
+                }
+                let idx = this.box(id).cases.findIndex(e => e.next == next)
+                this.box(id).cases.splice(idx, 1)
+                this.deleteBox(id)
               }
 
-              let idx = this.box(id).cases.findIndex(e => e.next == next)
-              this.box(id).cases.splice(idx, 1)
-              this.deleteBox(id)
 
               // let idx = this.boxes.findIndex(e => e.id == id)
               // this.boxes.splice(idx, 1)
               break;
          
             case "all":
-              this.prevReset(id)
-              this.deleteBox(id)
+              if(id == 1){
+                this.boxes = []
+                this.id = 1
+              }else{
+                this.prevReset(id)
+                this.deleteBox(id)
+              }
               break;
 
             default:
