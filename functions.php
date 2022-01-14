@@ -18,27 +18,34 @@ function bootstrap_enqueue_scripts() {
 
 	if(is_page(array(2497, 2734, 3828, 3859))){
         wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri() . '/css/bootstrap.min.css');
-        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
+
         wp_enqueue_style( 'fontawesome', 'https://pro.fontawesome.com/releases/v5.10.0/css/all.css');
+        wp_enqueue_style( 'bootstrap-icon', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css');
         wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.bundle.min.js');
+        wp_enqueue_script( 'lodash-new', get_stylesheet_directory_uri() . '/js/lodash.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
+        wp_enqueue_script( 'vuex', get_stylesheet_directory_uri() . '/js/vuex.js');
         wp_enqueue_script( 'sweetalert', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js');
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
     }
     
-    if(is_page(array(2497, 2734))){
+    if(is_page(array(2497))){
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog.js', 'vuejs', '', true);
     }
     
-    // if(is_page(array(2734))){
-    //     wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging.js', 'vuejs', '', true);
-    // }
+    if(is_page(array(2734))){
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
+        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging.js', 'vuejs', '', true);
+    }
     
     if(is_page(array(3828))){
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging-old.js', 'vuejs', '', true);
     }
     
     if(is_page(array(3859))){
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-old-bot-loading.js', 'vuejs', '', true);
     }
     

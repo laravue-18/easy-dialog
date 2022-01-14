@@ -6,15 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>easyDialog</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="css/vue-json-pretty.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/easy-dialog.css">
 </head>
-<body style="background-image: linear-gradient(to bottom, #ec6625, #3E313E); ">
+<body>
     <?php include('easy-dialog.php'); ?>
     <script src="js/jquery.js"></script>
-    <script src="js/jquery-migrate.min.js"></script>
+    <script src="js/lodash.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/vue.js"></script>
+    <script src="js/vuex.js"></script>
+    <script type="text/javascript" src="js/vJsonTree.umd.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="js/easy-dialog.js"></script>
 </body>

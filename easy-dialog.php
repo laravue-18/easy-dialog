@@ -1,574 +1,414 @@
-<div id="main-content">
-  <div class="container">
-    <div class="row">       
-
-      <div id="overlay">
-        <div class="cv-spinner">
-          <span class="spinner"></span>
-        </div>
+<div id="easyDialog" style="background: #ec6625;">
+    <div v-if="loading || waiting" id="overlay">
+      <div class="cv-spinner">
+        <span class="spinner"></span>
       </div>
-
-      <div id="slotModal" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
-        <div class="modal-dialog" style="margin-top: 150px">
-          <div class="modal-content" style="padding:15px">
-            <h5>Do you want to name this list of words "<span id="slotname_span"></span>"? If not please, please change the name to a word of your choice?</h5>
-            <input type="text" class="form-control" id="slotname" style="border: 1px solid #ddd !important; margin-bottom: 15px;">
-            <input id="slotname_submit" type="button" class="btn btn-primary" value="Submit" style="color: white">
-            <input id="slotname_cancel" type="button" class="btn" value="Cancel" style="">
-          </div>
-        </div>
-      </div>
-
-      <div class="" style="word-break:break-all;">
-        <input id="user_id" value="" hidden  />
-
-        <header class="alexa-header">
-          <div class="top-bar" style="">
-            <div class="buttons">
-              <div class="load-bot">
-                <form autocomplete="off" action="">
-                  <input 
-                    id="loadBot" 
-                    class="autocomplete" 
-                    type="text" 
-                    placeholder="Bot name ... " 
-                    style="background:#fff;"
-                  >
-                  <input 
-                    id="load_btn" 
-                    class="loading" 
-                    type="submit" 
-                    value="Load Bot"
-                    style="
-                      background:transparent; 
-                      color:#fff; 
-                      border:solid 1px #fff !important; 
-                      border-radius:12px; 
-                      padding:0px 10px;"
-                  >
-                </form>
-              </div>
-              <div class="save-bot">
-                <input id="save_flag" type="text" value="0" hidden/>
-                <input 
-                  id="save_bot_id" 
-                  type="text" 
-                  placeholder="Bot name..." 
-                  style="background:#fff;"
-                >
-                <button 
-                  id="save_bot_btn" 
-                  style="
-                      background:transparent; 
-                      color:#fff; 
-                      border:solid 1px #fff; 
-                      border-radius:12px; 
-                      padding:0px 10px;"
-                >
-                  Save Bot
-                </button>
-              </div>
-              <a 
-                id="instruction" 
-                href="https://easydialog.org/easybot-design-and-run-ai-bots-fast/" 
-                target="[_blank]"
-                style="
-                  background-image: linear-gradient(to bottom, #fd5500, #922b02); 
-                  color:#fff; 
-                  text-align: center; 
-                  align-self: center; 
-                  padding: 6px; 
-                  border:none; 
-                  border-radius:12px;" 
-              >
-                Help / How-To
-              </a>
-              <button 
-                id="buy-easybot" 
-                class="buy-bot" 
-                style="
-                  background-image: linear-gradient(to bottom, #fd5500, #922b02); 
-                  padding:6px; 
-                  border:none; 
-                  border-radius:12px;"
-              >
-                Own Your Bot
-              </button>
-              <button id="" class="buy-bot-aa" style="display: none;"></button>
-            </div>
-          </div>
-          <div class="multi-bot-key">
-            <div class="key-title"><span>Bot Keys:</span></div>
-            <div class="mobile-flex">
-              <div class="key-field">
-                <!-- <img src="https://easydialog.org/wp-content/uploads/2020/10/us.png" style=""> -->
-                <span id="key-us" style="text-shadow:2px 3px 3px #000;"></span>
-              </div>
-            </div>
-            
-            <!--
-            ORIGINAL POSITION OF THE SLOT
-            -->
-            
-          </div>
-          <div class="asRow">
-            <div class="rowNumber">
-              <!-- <button class="btn" id="insertStart">+</button> -->
-            </div>
-            <div class="rowBody">
-              <div class="asBox">Human Says:</div>
-              <div class="asBox">Al Says:</div>
-              <div class="asBox">Al Does:</div>
-            </div>
-          </div>
-        </header>
-
-        <section class="alexa-section">
-          <div id="easyDialog">
-            <div :key="renderKey">
-              <div class="asRow">  <!-- StartRow -->
-                <div class="rowNumber">
-                    <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(0)">
-                      {{ insert === 0 ? '-' : '+' }}
-                    </button>
-                </div>
-                <template v-if="insert === 0">
-                  <div class="rowBody">
-                      <div class="asBox">
-                          <template v-if="rows()[0]['action'] != 'hs'">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
-                          </template>
-                      </div>
-                      <div class="asBox">
-                        <template v-if="rows()[0]['action'] != 'as'">
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
-                          <div v-if="ases().length" class="dropList">
-                              <template v-for="i in ases()">
-                                  <div class="adItem">
-                                      <input type="text" :value="i.cases[0].content" @click="selectAsBox(i, $event)" readonly>
-                                  </div>
-                              </template>
-                          </div>
-                        </template>
-                      </div>
-                      <div class="asBox">
-                        <template 
-                          v-if="rows()[0]['action'] != 'ad'"
-                        >
-                          <div class="row g-0">
-                            <div class="col-6 p-1">
-                              <div class="btn-group d-grid">
-                                <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Select Main
-                                </button>
-                                <ul class="dropdown-menu">
-                                  <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
-                                  <li><hr class="dropdown-divider"></li>
-                                  <li v-for="main in ad_mains()">
-                                    <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                            <div class="col-6 p-1">
-                            </div>
-                          </div>
-                        </template>
-                      </div>
-                  </div>
-                </template>
-              </div>
-              <template v-for="(row, index) in rows()" :key="index">
-                <div class="asRow">
-                  <div class="rowNumber">
-                    <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(row.id)">
-                      {{ insert === row.id ? '-' : '+' }}
-                    </button>
-                  </div>
-                  <div class="rowBody">
-                    <template v-if="row.action == 'hs'">
-                      <div class="asBox">
-                        <div>
-                          <div class="btn btn-primary btn-sm">{{ row.id }}</div>
-                        </div>
-                        <div 
-                          v-for="(i, idx) in box(row.id).cases"
-                          class="hsCase" 
-                          :class="{active: i.content == activeCases[row.id]}"
-                          @click.stop.prevent = "activeCase(row, i.content)"
-                        >
-                          <input
-                            class="listItem"
-                            type="text"
-                            :value = "i.content"
-                            @dblclick="changeHsCase(row, i, $event)"
-                            readonly
-                          >
-                          <span class="removeMark" @click.stop.prevent="deleteCase(row, i.content == activeCases[row.id], idx)">×</span>
-                        </div>
-                        <input type="text" placeholder="type human sentence" :value="text" @keyup.enter="addNewCase('hs', row.id, $event)">
-                      </div>
-                      <div class="asBox"></div>
-                      <div class="asBox"></div>
-                    </template>
-                    <template v-else-if="row.action == 'as'">
-                      <div class="asBox"></div>
-                      <div class="asBox">
-                        <div>
-                          <div class="btn btn-primary btn-sm">{{ row.id }}</div>
-                        </div>
-                        <div class="asCase" @click="adClick">
-                            <input class="listItem"
-                                type="text" 
-                                :value="box(row.id).cases[0].content"
-                                @click = "updateAsCase(row, $event)"
-                                
-                                @change="changeAsCase(row, $event)" 
-                                @blur="changeAsCase(row, $event)" 
-                                @keyup.enter="changeAsCase(row, $event)"
-                                readonly>
-                            <span class="removeMark" @click.stop.prevent="deleteCase(row)">×</span>
-                        </div>
-                        <div class="mt-2" v-if="getImage(row)">
-                          <div 
-                            style="
-                              height: 100px; 
-                              margin: 3px 0; 
-                              border: 1px solid white;
-                              background: black;
-                              background-size: contain;
-                              background-repeat: no-repeat;
-                              background-position: center center;"
-                            :style="'background-image: url(\'' + getImage(row) + '\');'"
-                          ></div>
-                        </div>
-                        <input 
-                          type="file" hidden
-                          ref="photo"
-                          style="visibility:hidden; height: 0;"
-                          @blur="updatePhotoPreview(row, $event)"
-                          @change="updatePhotoPreview(row, $event)"
-                        >
-                        <button
-                          @click="selectNewPhoto"
-                          style="
-                            margin: 3px;
-                            padding: 5px 10px;
-                            border-radius: 9999px;
-                            height: 2.2em;"
-                        >
-                          Select Image
-                        </button>
-                        <button 
-                          @click="deletePhoto(row)" v-show="getImage(row)"
-                          style="
-                            margin: 3px;
-                            padding: 5px 10px;
-                            border-radius: 9999px;
-                            height: 2.2em;"
-                        >
-                          Remove Image
-                        </button>
-                        <div v-if = "rows().length == index + 1" class="">
-                          <template v-if = "!row.next">
-                            <button
-                              style="
-                                margin: 3px;
-                                padding: 5px 10px;
-                                border-radius: 9999px;
-                                height: 2.2em;"
-                              data-bs-toggle="modal" data-bs-target="#nextStepModal"
-                            >
-                              Choose Next Step
-                            </button>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                              <div class="modal-dialog">
-                                <div class="modal-content">
-                                  <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Select</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                                  <div class="modal-body">
-                                    <select class="form-control" v-model="next">
-                                      <option value="0">Select Id of Next Step</option>
-                                      <option v-for="row in rows()" :value="row.id">{{ row.id }}</option>
-                                    </select>
-                                  </div>
-                                  <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary" @click="setNext(row.id)">Save changes</button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </template>
-                          <template v-else>
-                            <button class="btn btn-warning btn-sm">Next Step is {{ row.next }} .</button>
-                          </template>
-                        </div>
-                        <div v-if="ases().length" class="dropList">
-                          <template v-for="i in ases()">
-                            <div class="adItem">
-                              <input type="text" :value="i.cases[0].content" @click="selectAsBox(i, $event)" readonly>
-                            </div>
-                          </template>
-                        </div>
-                      </div>
-                      <div class="asBox"></div>
-                    </template>
-                    <template v-else-if="row.action == 'ad'">
-                        <div class="asBox"></div>
-                        <div class="asBox"></div>
-                        <div class="asBox">
-                          <div>
-                            <div class="btn btn-primary btn-sm">{{ row.id }}</div>
-                          </div>
-                          <div class="row g-0">
-                            <div class="col-6 p-1">
-                                <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-eb-primary text-white dropdown-toggle text-start arrow-none btn-sm " data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ main(row) }}
-                                  </button>
-                                  <span
-                                      @click.stop="deleteStep(row)"
-                                      style="cursor: pointer;right: 0.25em; top: 0.25em; color: white; z-index: 2;"
-                                      class="position-absolute"
-                                  >×</span>
-                                  <ul class="dropdown-menu">
-                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(row, $event)" placeholder="Add New ..."></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li v-for="main in ad_mains()">
-                                      <span class="dropdown-item" @click="activeAd('main', row, main)">{{main}}</span>
-                                    </li>
-                                  </ul>
-                                </div>
-                                <div class="mt-1">
-                                  <input 
-                                    type="file" hidden
-                                    ref="photo"
-                                    style="visibility:hidden; height: 0;"
-                                    @change="updateScript(row, $event)"
-                                  >
-                                  <button
-                                    @click="selectNewScript"
-                                    class="btn bg-white"
-                                  >
-                                    Select Script
-                                  </button>
-                                  <button 
-                                    @click="deleteScript(row)" v-show="getScript(row)"
-                                    style="
-                                      margin: 3px;
-                                      padding: 5px 10px;
-                                      border-radius: 9999px;
-                                      height: 2.2em;"
-                                  >
-                                    Remove Script
-                                  </button>
-                                </div>
-                            </div>
-                            <div class="col-6 p-1">
-                                <div class="btn-group d-grid">
-                                  <button type="button" class="btn dropdown-toggle text-white text-start arrow-end bg-eb-primary btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ activeCases[row.id] }}
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub(row, box(row.id).cases[0].content[0], $event)" placeholder="Add New ..."></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li v-for="sub in ad_subs(box(row.id).cases[0].content[0])">
-                                      <span class="dropdown-item mb-1 d-flex justify-content-between" :class="box(row.id).cases.map(i => i.content[1]).includes(sub) ? 'bg-eb-primary' : ''" @click="activeAd('sub', row, sub)">
-                                        <span>{{ sub }}</span>
-                                        <template v-if="box(row.id).cases.map(i => i.content[1]).includes(sub)">
-                                          <span
-                                            @click.stop="deleteCase(row, sub == activeCases[row.id], box(row.id).cases.map(i => i.content[1]).indexOf(sub))"
-                                            style="cursor: pointer;"
-                                          >×</span>
-                                        </template>
-                                      </span>
-                                    </li>
-                                  </ul>
-                                </div>
-                              
-                            </div>
-                          </div>
-                        </div>
-                    </template>
-                  </div>
-                </div>
-                <template v-if="row.id == insert">
-                  <div class="asRow">
-                    <div class="rowNumber">
-                      <input type="text" :value="rows().length + 1">
-                    </div>
-                    <div class="rowBody">
-                        <div class="asBox">
-                            <template v-if=" row.action != 'hs' ">
-                                <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
-                            </template>
-                        </div>
-                        <div class="asBox">
-                          <template  v-if=" row['action'] != 'as' ">
-                            <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
-                            <div v-if="ases().length" class="dropList">
-                                <template v-for="i in ases()">
-                                    <div class="adItem">
-                                        <input type="text" :value="i.cases[0].content" @click="selectAsBox(i, $event)" readonly>
-                                    </div>
-                                </template>
-                            </div>
-                          </template>
-                        </div>
-                        <div class="asBox">
-                          <template 
-                            v-if="row['action'] != 'ad'"
-                          >
-                            <div class="row g-0">
-                              <div class="col-6 p-1">
-                                <div class="btn-group d-grid">
-                                  <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Select Main
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                    <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li v-for="main in ad_mains()">
-                                      <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <div class="col-6 p-1">
-                              </div>
-                            </div>
-                          </template>
-                        </div>
-                    </div>
-                  </div>
-                </template>
-              </template>
-              <template v-if="!(insert + 1) && !(rows().length  && rows()[rows().length -1].next)">
-                <div class="asRow">
-                  <div class="rowNumber">
-                    <input type="text" :value="rows().length + 1">
-                  </div>
-                  <div class="rowBody">
-                      <div class="asBox">
-                          <template v-if="rows().length ? rows()[rows().length-1]['action'] != 'hs' : true">
-                              <input class="focusElement" type="text" placeholder="type human sentence" :value="text" @change="addNewBox('hs', prev_row_id, $event.target.value)">
-                          </template>
-                      </div>
-                      <div class="asBox">
-                        <template 
-                          v-if="rows().length ? rows()[rows().length-1]['action'] != 'as' : true"
-                        >
-                          <input class="focusElement" type="text" placeholder="type AI sentence" :value="text" @change="addNewBox('as', prev_row_id, $event.target.value)" @click="adClick">
-                          <div v-if="ases().length" class="dropList">
-                              <template v-for="i in ases()">
-                                  <div class="adItem">
-                                      <input type="text" :value="i.cases[0].content" @click="selectAsBox(i, $event)" readonly>
-                                  </div>
-                              </template>
-                          </div>
-                        </template>
-                      </div>
-                      <div class="asBox">
-                        <template 
-                          v-if="rows().length ? rows()[rows().length-1]['action'] != 'ad' : true"
-                        >
-                          <div class="col-6 p-1">
-                            <div class="btn-group d-grid">
-                              <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                                Select Main
-                              </button>
-                              <ul class="dropdown-menu">
-                                <li class="p-1"><input type="text" class="form-control-sm" @change="addAdMain(false, $event, -1)" placeholder="Add New ..."></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li v-for="main in ad_mains()">
-                                  <span class="dropdown-item" @click="addNewBox('ad', prev_row_id, main)">{{main}}</span>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="col-6 p-1">
-                          </div>
-                        </template>
-                      </div>
-                  </div>
-                </div>
-              </template>
-            </div>
-          </div>
-          
-        </section>
-
-        <footer class="alexa-footer">
-          <div>
-              <div style="display: flex;">
-                <button 
-                  id="create_test" 
-                  class="btn btn-primary btn-lg" 
-                  style="
-                    display:block; 
-                    margin:0 auto; 
-                    padding:10px 30px; 
-                    background-image:linear-gradient(to bottom, #fe5500, #932b02); 
-                    border:none; 
-                    border-radius:30px;"
-                >
-                  <span 
-                    style="
-                      font-family:Roboto; 
-                      font-weight:bold; 
-                      letter-spacing:1px; 
-                      text-shadow:0px 0px 20px #000;"
-                  >
-                    BUILD easyBOT
-                  </span>
-                </button>
-                <!-- <button 
-                  id="reset" 
-                  class="btn btn-primary btn-lg" 
-                  style="
-                    display:block; 
-                    margin:0 auto; 
-                    padding:10px 30px; 
-                    background-image:linear-gradient(to bottom, #fe5500, #932b02); 
-                    border:none; 
-                    border-radius:30px;"
-                >
-                  <span 
-                    style="
-                      font-family:Roboto; 
-                      font-weight:bold; 
-                      letter-spacing:1px; 
-                      text-shadow:0px 0px 20px #000;"
-                  >
-                    Reset
-                  </span> -->
-                </button>
-              </div>
-              
-              <div class="register_slot" style="display:flex; justify-content:center; align-items: center; padding: 15px; border-top: solid 1px; margin: 15px;">
-                <button type="button" class="btn" style="width: 34px; height: 34px; background: transparent; border:1px solid #fff; border-radius: 9999px; color: white;" data-toggle="tooltip" data-placement="top" data-html="true" title="<p style='text-align: justify;'>Sometimes you want your bot to treat a group of words in the same way. For example, you have a group of friends called John, Jim and Mary. If you design a phone call bot, in easyBot you only need to add a sentence like “Call John on his phone”, and add Jim and Mary as “similar” words to John by uploading a text file, that lists John, Jim and Mary in separate lines. After this, any of your bot users can also say “Call Jim on his phone” or “Call Mary on her phone”, and get the same bot flow that you defined for “Call John on his phone”.Place names, time and date, and other common groups of similar words are automatically recognized by easyBot. They do not need to be registered.</P>">?</button>
-                <div class=col_label>
-                  <label for="similar_words" id="words-label">Register Similar Words : </label>
-                </div>
-                <div class=col_file style="display:flex;">
-                  <input 
-                    type="file" 
-                    name="similar_words" 
-                    id="similar_words" 
-                    style="font-size: 15px; border:1px solid #ddd; border-radius: 3px; background: white; padding: 5px;">
-                  <button id="submit_words" style="color:black; border-radius:9999px; font-size:20px; width:80px; margin-left: 10px;">Send</button>
-                </div>
-              </div> 
-              
-            </div>
-        </footer>
-      </div>
-
     </div>
-  </div>
+    <div v-if="!loading" class="container">
+        <div class="row py-3">
+            <div class="col-lg-5 mb-2 mb-lg-0">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Bot Name ...">
+                            <button class="btn btn-secondary" type="button">Load</button>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="col-6 input-group">
+                            <input type="text" class="form-control" placeholder="Bot Name ...">
+                            <button class="btn btn-secondary" type="button">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+            </div>
+            <div class="col-lg-5">
+                <div class="row">
+                    <div class="col-6">
+                        <a href="https://easydialog.org/easybot-design-and-run-ai-bots-fast/" class="btn btn-secondary d-block" target="[_blank]">Help / How-To</a>
+                    </div>
+                    <div class="col-6 d-grid">
+                        <button class="btn btn-secondary">Own Your Bot</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 pt-2">
+                <span class="h4">Bot Keys : </span>
+                <span class="h4">BK123456789 </span>
+            </div>
+            <div class="col-6 text-end">
+                <button class="btn btn-secondary mb-2">Build easyBot</button>
+            </div>
+        </div>
+
+        <div class="rounded shadow bg-white overflow-hidden">
+            <div class="bg-light">
+                <div class="row border-bottom">
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">Human Says : </h3></div>
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">AI Says : </h3></div>
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">AI Does : </h3></div>
+                </div>
+            </div>
+            <div class="p-2 overflow-scroll" style="height: 600px;">
+              <div v-for="(card, index) in cards" :key="index">
+                <new-box v-if="newStepPosition == card.id"></new-box>
+                <div class="row mb-1">
+                    <div class="col-4">
+                        <card-hs v-if="card.action == 'hs'" :card="card"></card-hs>
+                    </div>
+                    <div class="col-4">
+                        <card-as v-if="card.action == 'as'" :card="card"></card-as>
+                    </div>
+                    <div class="col-4">
+                        <card-ad v-if="card.action == 'ad'" :card="card"></card-ad>
+                    </div>
+                </div>
+              </div>
+              <new-step-btn v-if="newStepPosition" :id="0"></new-step-btn>
+              <new-box v-if="!newStepPosition"></new-box>
+            </div>
+        </div>
+
+        <div class="py-3 d-flex align-items-center">
+            <h5 class="me-3 mb-0">Register Similar Words :</h5>
+            <div class="input-group" style="width: 400px;">
+                <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                <button class="btn btn-secondary" type="button" id="inputGroupFileAddon04">Send</button>
+            </div>
+            <button class="btn btn-secondary rounded-circle ms-2 text-bold">?</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <select class="form-control" v-model="next">
+              <option v-for="id in boxes.map(i => i.id)" value="id">{{id}}</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" @click="setNext(row.id)">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </div>
+
+<script type="text/x-template" id="card-hs-template">
+    <div>
+        <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+        <the-card>
+            <div class="row">
+                <div v-for="(i, index) in card.cases" class="col-md-6" :key="index">
+                    <the-card-case :content="i.content" :active="i.active" :action="card.action" :box-id="card.id" :case-id="index" :casesLength="card.cases.length">
+                    </the-card-case>
+                </div>
+            </div>
+            <input class="form-control form-control-sm" type="text" placeholder="Add New ..."
+                @change="addCaseToCard(card.id, $event)"
+            >
+            <div class="d-md-flex justify-content-between align-items-center mt-2">
+                <div class="">
+                    <div v-if="card.next">
+                        <span>Next step: <strong> #{{ card.next}}</strong></span>
+                    </div>
+                </div>
+                <div>
+                  <template v-if="!card.next">
+                    <change-next-btn :id="card.id"/>
+                    <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <select class="form-control" v-model="next">
+                              <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                            </select>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                    <new-step-btn :id="card.id"/>
+                </div>
+            </div>
+        </the-card>
+    </div>
+</script>
+
+<script type="text/x-template" id="card-as-template">
+    <div>
+        <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+        <the-card>
+            <div v-for="(i, index) in card.cases" :key="index">
+                <the-card-case :content="i.content" :active="i.active" :box-id="card.id" :case-id="index">
+                </the-card-case>
+            </div>
+            <div
+              style="
+                height: 70px;
+                margin: 3px 0;
+                border: 1px solid white;
+                background: black;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center center;"
+              :style="'background-image: url(\'' + card.doc + '\');'"
+            ></div>
+            <div class="d-md-flex justify-content-between align-items-center mt-2">
+                <div class="">
+                    <div v-if="card.next">
+                        <span>Next step: <strong> #{{ card.next}}</strong></span>
+                    </div>
+                </div>
+                <div>
+                    <template v-if="!card.next">
+                      <change-next-btn :id="card.id"/>
+                      <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <select class="form-control" v-model="next">
+                                <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <new-image-btn :id="card.id"/>
+                    <new-step-btn :id="card.id"/>
+                </div>
+            </div>
+        </the-card>
+    </div>
+</script>
+
+<script type="text/x-template" id="card-ad-template">
+    <div :key="renderKey">
+        <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+        <the-card>
+            <div class="row">
+                <div class="col-6">
+                    <div class="btn-group d-grid">
+                      <button type="button" class="btn bg-primary text-white dropdown-toggle text-start arrow-none btn-sm " data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ activeContent[0] }}
+                      </button>
+                      <span
+                          @click.stop=""
+                          style="cursor: pointer;right: 0.25em; top: 0.25em; color: white; z-index: 2;"
+                          class="position-absolute"
+                          @click="deleteBox"
+                      >×</span>
+                      <ul class="dropdown-menu">
+                        <li class="p-1"><input type="text" class="form-control-sm" @change="changeAdMain" placeholder="Add New ..."></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li v-for="(main, index) in mains" :key="index">
+                          <span class="dropdown-item" @click="activeAdMain(main)">{{main}}</span>
+                        </li>
+                      </ul>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="btn-group d-grid">
+                      <button type="button"
+                        class="dropdown-toggle btn bg-primary text-white  text-start arrow-none btn-sm "
+                        data-bs-toggle="dropdown" aria-expanded="false"
+                      >
+                        {{ activeContent[1] }}
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li class="p-1"><input type="text" class="form-control-sm" @change="addAdSub" placeholder="Add New ..."></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li v-for="sub in subs(activeContent[0])">
+                          <span class="dropdown-item mb-1 d-flex justify-content-between"
+                            :class="{ 'bg-primary' : caseSubs.includes(sub)}"
+                            @click="activateOrPushCase(sub)"
+                          >
+                            <span>{{ sub }}</span>
+                            <template v-if="caseSubs.includes(sub)">
+                              <span
+                                @click.stop="deleteCase(sub)"
+                                style="cursor: pointer;"
+                              >×</span>
+                            </template>
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="d-md-flex justify-content-between align-items-center mt-2">
+                <div class="">
+                    <div v-if="card.next">
+                        <span>Next step: <strong> #{{ card.next}}</strong></span>
+                    </div>
+                </div>
+                <div>
+                    <template v-if="!card.next">
+                      <change-next-btn :id="card.id"/>
+                      <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <select class="form-control" v-model="next">
+                                <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <new-script-btn :id="card.id"/>
+                    <new-step-btn :id="card.id"/>
+                </div>
+            </div>
+        </the-card>
+    </div>
+</script>
+
+<!-- new-box Component -->
+<script type="text/x-template" id="new-box-template">
+    <div class="row py-1" :key='renderKey'>
+        <div class="col-4">
+            <input type="text" class="form-control focusElement" placeholder="Type Human Sentence"
+              @change="addNewBox('hs', $event)"
+            >
+        </div>
+        <div class="col-4">
+            <input type="text" class="form-control" placeholder="Type AI Sentence"
+              @change="addNewBox('as', $event)"
+            >
+        </div>
+        <div class="col-4">
+          <div class="row">
+            <div class="col-6">
+              <div class="btn-group d-grid">
+                <button type="button" class="btn bg-white dropdown-toggle text-start arrow-end btn border" data-bs-toggle="dropdown" aria-expanded="false">
+                  Select Main
+                </button>
+                <ul class="dropdown-menu">
+                  <li class="p-1"><input type="text" class="form-control" @change="addNewBox('ad', $event)" placeholder="Add New ..."></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li v-for="main in mains">
+                    <span class="dropdown-item" @click="selectMain('ad', main)">{{main}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="the-card-template">
+    <div class="rounded shadow bg-light bg-gradient p-2">
+        <slot></slot>
+    </div>
+</script>
+
+<script type="text/x-template" id="the-card-button-template">
+    <button class="btn btn-outline-secondary p-0 px-1" :title="title">
+        <slot></slot>
+    </button>
+</script>
+
+<script type="text/x-template" id="change-next-btn-template">
+    <button class="btn btn-outline-secondary p-0 px-1"
+      title="Change Next Step"
+      data-bs-toggle="modal" data-bs-target="#nextStepModal"
+    >
+        <i class="bi-chevron-bar-right"></i>
+    </button>
+</script>
+
+<script type="text/x-template" id="new-step-btn-template">
+    <button class="btn btn-outline-secondary p-0 px-1" title="Insert New Step Before This Step"
+      @click="clickHandler"
+    >
+        <i class="bi-plus"></i>
+    </button>
+</script>
+
+<script type="text/x-template" id="new-image-btn-template">
+  <span>
+    <input
+      type="file" hidden
+      ref="photo"
+      style="visibility:hidden; height: 0;"
+      @change="updateImage"
+    >
+    <button class="btn btn-outline-secondary p-0 px-1" title="Upload Image File"
+      @click="clickHandler"
+    >
+        <i class="bi-image"></i>
+    </button>
+  </span>
+</script>
+
+<script type="text/x-template" id="new-script-btn-template">
+  <span>
+    <input
+      type="file" hidden
+      ref="photo"
+      style="visibility:hidden; height: 0;"
+      @change="updateImage"
+    >
+    <button class="btn btn-outline-secondary p-0 px-1" title="Upload Script File"
+      @click="clickHandler"
+    >
+        <i class="bi-file-text"></i>
+    </button>
+  </span>
+</script>
+
+<script type="text/x-template" id="the-card-case-template">
+    <div class="position-relative bg-gradient px-2 py-1 text-light d-flex justify-content-between align-items-center mb-1" :class="active?'bg-primary':'bg-secondary'">
+        <div class="w-100" @click="handleClick">
+            {{content}}
+        </div>
+        <textarea
+            v-if="editing"
+            class="position-absolute top-100 start-0 w-100 form-control" style="z-index: 2;"
+            @blur="changeEventHandler($event)"
+            @change="changeEventHandler($event)"
+            @keypress.enter.prevent="changeEventHandler($event)"
+        >{{content}}</textarea>
+        <span class="text-white" style="cursor: context-menu;" @click="removeEventHandler()">×</span>
+    </div>
+</script>
