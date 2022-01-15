@@ -12,6 +12,31 @@ Array.prototype.remove = function() {
     return this;
 };
 
+var isBuild = false;
+var isChange = false;
+var user_id ="";
+var browser = "";
+var ip = "";
+
+if(navigator.userAgent.indexOf("Chrome") != -1 ) browser = "chrome";
+else if(navigator.userAgent.indexOf("Firefox") != -1 ) browser = "firefox";
+else if (navigator.userAgent.indexOf("MSIE") != -1 ) browser = "msie";
+else if (navigator.userAgent.indexOf("Edge") != -1 ) browser = "edge";
+else if (navigator.userAgent.indexOf("Safari") != -1 ) browser = "safari";
+else if (navigator.userAgent.indexOf("Opera") != -1 ) browser = "opera";
+else browser = "other";
+
+jQuery.getJSON("https://api.ipify.org?format=json", function(data) {
+  if(!data.ip){
+      alert("we couldn't retrieve your IP properly. Please acknowledge that this might cause issues.")
+  }else{
+      let str = data.ip.replace(/\./g, "");
+      ip = str;
+  }
+});
+
+var url = 'https://easydialog.org/wp-admin/admin-ajax.php'
+
 const store = new Vuex.Store({
     state: {
         boxes: [],
@@ -780,7 +805,42 @@ const vm = new Vue({
     },
 
     methods: {
-
+      buildBot(){
+        if(browser && ip){
+          if(!this.boxes.length){
+            alert("Warning: There is no content to build the Bot.")
+            return true;
+          }
+          if(confirm(JSON.stringify(this.boxes))){
+            this.waiting = true
+            fetch(url, {
+              method: 'POST',
+              credentials: 'same-origin',
+              body: JSON.stringify({
+                action:'build_bot_dev',
+                param:{
+                    data:{
+                      boxes: this.boxes,
+                      scripts: this.scripts,
+                      docs: this.docs,
+                      ad: this.ad,
+                    },
+                    user_id: browser + ip
+                }
+              })
+            })
+            .then(res => {
+              if(res.ok) this.waiting = false
+              throw new Error('Network response was not ok.')
+            })
+            .catch(err => {
+              this.waiting = false
+              alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
+              console.log(err)
+            })
+          }
+        }
+      },
     }
 
 })

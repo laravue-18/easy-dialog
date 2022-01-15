@@ -42,7 +42,7 @@
                 <span class="h4">BK123456789 </span>
             </div>
             <div class="col-6 text-end">
-                <button class="btn btn-secondary mb-2">Build easyBot</button>
+                <button class="btn btn-secondary mb-2" @click="buildBot">Build easyBot</button>
             </div>
         </div>
 
