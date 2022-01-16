@@ -10,14 +10,14 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Bot Name ...">
-                            <button class="btn btn-secondary" type="button">Load</button>
+                            <input type="text" class="form-control" @change="loadBot" v-model="loadingBotId" placeholder="Bot Name ...">
+                            <button class="btn btn-secondary" type="button" @click="loadBot">Load</button>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="col-6 input-group">
-                            <input type="text" class="form-control" placeholder="Bot Name ...">
-                            <button class="btn btn-secondary" type="button">Save</button>
+                            <input type="text" class="form-control" @change="saveBot" v-model="savingBotId" placeholder="Bot Name ...">
+                            <button class="btn btn-secondary" @click="saveBot" type="button">Save</button>
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
         <div class="row">
             <div class="col-6 pt-2">
                 <span class="h4">Bot Keys : </span>
-                <span class="h4">BK123456789 </span>
+                <span class="h4">{{ botKey }} </span>
             </div>
             <div class="col-6 text-end">
                 <button class="btn btn-secondary mb-2" @click="buildBot">Build easyBot</button>

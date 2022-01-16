@@ -260,6 +260,10 @@ const store = new Vuex.Store({
           }
         },
 
+        loadBoxes({commit}, boxes){
+          commit('loadBoxes', boxes)
+        },
+
         addAdSubToBox({state, commit, getters, dispatch}, {boxId, main, sub}){
           commit('pushSubToMain', {main, sub});
           let box = getters.getBox(boxId)
@@ -302,6 +306,9 @@ const store = new Vuex.Store({
     mutations: {
         initBoxes(state){
           state.boxes = []
+        },
+        loadBoxes(state, boxes){
+          state.boxes = boxes
         },
         setCards(state, cards){
             state.cards = cards
@@ -786,6 +793,12 @@ const vm = new Vue({
             loading: false,
             waiting: false,
             next: null,
+            botKey: '',
+            loadingBotId: '',
+            savingBotId: '',
+            isChanged: false,
+            isBuilt: false,
+            isSaved: true
         }
     },
     computed: {
@@ -798,6 +811,12 @@ const vm = new Vue({
         newStepPosition(){
           return this.$store.state.newStepPosition
         }
+    },
+
+    watch: {
+      boxes: () => {
+        this.isChanged = true
+      }
     },
 
     created: function(){
@@ -813,34 +832,165 @@ const vm = new Vue({
           }
           if(confirm(JSON.stringify(this.boxes))){
             this.waiting = true
-            fetch(url, {
-              method: 'POST',
-              credentials: 'same-origin',
-              body: JSON.stringify({
-                action:'build_bot_dev',
-                param:{
-                    data:{
-                      boxes: this.boxes,
-                      scripts: this.scripts,
-                      docs: this.docs,
-                      ad: this.ad,
-                    },
-                    user_id: browser + ip
-                }
-              })
-            })
-            .then(res => {
-              if(res.ok) this.waiting = false
-              throw new Error('Network response was not ok.')
-            })
-            .catch(err => {
-              this.waiting = false
-              alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
-              console.log(err)
-            })
+            $.ajax({
+                type: 'POST',
+                url: url,
+                xhrFields: { withCredentials: true},
+                data:{
+                  action:'build_bot_dev',
+                  param:{
+                      data:{
+                        boxes: this.$store.state.boxes,
+                        scripts: this.$store.state.scripts,
+                        docs: this.$store.state.docs,
+                        ad: this.$store.state.ad,
+                      },
+                      user_id: browser + ip
+                  }
+                },
+
+                dataType: 'json',
+                success: function(response) {
+                  vm.waiting = false
+                  vm.botKey = response.password.en; // .de  .fr  .ja
+
+                  if(response.message){
+                      alert(response.message);
+                    isBuild = true
+                    isChange = false
+                  }else{
+                      alert('Something happend!!!')
+                  }
+                },
+                error: function(){
+                    vm.waiting = false
+                    alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
+                },
+                timeout: 300000
+            });
           }
         }
       },
-    }
+      loadBot(){
+        if(!this.loadingBotId) {
+          alert('Input name to load the Bot')
+          return
+        }
+        e.preventDefault();
 
+        if(!this.isChanged || confirm("The current bot hasn’t been built.\n Shall I still load a new bot?")){
+            if(this.isSaved){
+                jQuery.ajax({
+                    type: 'POST',
+                    url: url,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+
+                    data:{
+                        action:'load_bot_dev',
+                        param:{
+                            user_id: browser + ip,
+                            bot_id: this.loadingBotId
+                        }
+                    },
+                    dataType:'json',
+                    beforeSend: function() {
+                        this.waiting = true
+                    },
+                    success: (res) => {
+                        this.waiting  = false
+                        if(res.message){
+                          alert(res.message);
+                        }else if(res.data){
+                          this.savingBotId = this.loadingBotId
+                          this.isBuilt = true
+                          this.isChanged = false
+                          let data = res.data
+
+                          this.$store.dispatch('loadBoxes', data)
+                        }else{
+                            alert("Something is wrong!");
+                        }
+                    },
+                    error: function(err){
+                        this.waiting = false
+                        alert("No response!!!");
+                    },
+                    timeout: 30000
+                });
+            }else{
+                alert("Please Payment to load the BOT!");
+            }
+        }
+      },
+      saveBot(){
+        // if(!jQuery("#save_bot_id").val()) {
+        //   alert('Please input the specific name to save your own Bot')
+        //   return
+        // }
+
+        // if(isChange || !isBuild){
+        //   alert("Bots must be built before you can save them. Please build the bot first.")
+        //   return
+        // }
+
+        // if(!isBuild){
+        //   alert("Warning: Please Build")
+        //   return
+        // }
+
+        if(!this.boxes.length) {
+          alert("Warning: There is no content to build the Bot.")
+          return true;
+        }
+
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            xhrFields: {
+                withCredentials: true
+            },
+
+            data:{
+                action:'save_bot_dev',
+                param:{
+                    user_id: browser + ip,
+                    data:{
+                      boxes: this.$store.state.boxes,
+                      scripts: this.$store.state.scripts,
+                      docs: this.$store.state.docs,
+                      ad: this.$store.state.ad,
+                    },
+                    save_bot_id: this.savingBotId
+                }
+            },
+            dataType:'json',
+            beforeSend: () => {
+                this.waiting = true
+            },
+            success: (response) => {
+                this.waiting = false
+                /*
+                if(response.message=="bot_notbuilt"){
+                    alert("You must be build your bot before saving it - Click on \"Build EasyBot\" to build!");
+                }else if(response.message=="bot_notpaid"){
+                    alert("Please buy your bot, so you can save and load it at any time. Click on \"Own Your Bot\" for details.");
+                }else if(response.message=="save ok"){
+                    alert("Saved Successfully!");
+                }else{
+                    alert("Saving Failed. Try again later!");
+                }
+                */
+                alert(response.message);
+            },
+            error: function(err){
+                this.waiting = false
+                alert("Failure!");
+            },
+            timeout: 30000
+        });
+
+      }
+    }
 })
