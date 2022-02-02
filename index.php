@@ -19,6 +19,10 @@
     <script src="js/vuex.js"></script>
     <script type="text/javascript" src="js/vJsonTree.umd.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
     <script src="js/easy-dialog.js"></script>
 </body>
 </html>

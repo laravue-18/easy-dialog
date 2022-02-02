@@ -25,6 +25,8 @@ function bootstrap_enqueue_scripts() {
         wp_enqueue_script( 'lodash-new', get_stylesheet_directory_uri() . '/js/lodash.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
         wp_enqueue_script( 'vuex', get_stylesheet_directory_uri() . '/js/vuex.js');
+        wp_enqueue_script( 'Sortable', get_stylesheet_directory_uri() . '/js/Sortable@1.8.4.min.js');
+        wp_enqueue_script( 'vuedraggable', get_stylesheet_directory_uri() . '/js/vuedraggable.min.js');
         wp_enqueue_script( 'sweetalert', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js');
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
     }

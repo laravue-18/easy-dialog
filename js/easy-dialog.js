@@ -48,25 +48,32 @@ const store = new Vuex.Store({
     },
     getters: {
         cards(state, getters){
-          let cards = [];
-          if(state.boxes.length){
-            let _loop = lodash.cloneDeep(getters.getBox(1));
-            while(true){
-              if(cards.map(i => i.id).includes(_loop.id)) break;
-              const activeCaseIndex = state.activeCases[_loop.id] ? state.activeCases[_loop.id] : 0;
-              let next = _loop.cases[activeCaseIndex].next
-              _loop.cases[activeCaseIndex]['active'] = true
-              _loop.next = next
-              let doc = state.docs.find( i => i.caseid == _loop.id)
-              if(doc){
-                _loop.doc = doc.data
+          try{
+            let cards = [];
+            if(state.boxes.length){
+              let _loop = lodash.cloneDeep(getters.getBox(1));
+              while(true){
+                if(cards.map(i => i.id).includes(_loop.id)) break;
+                const activeCaseIndex = state.activeCases[_loop.id] ? state.activeCases[_loop.id] : 0;
+                let next = _loop.cases[activeCaseIndex].next
+                _loop.cases[activeCaseIndex]['active'] = true
+                _loop.next = next
+                let doc = state.docs.find( i => i.caseid == _loop.id)
+                if(doc){
+                  _loop.doc = doc.data
+                }
+                cards.push(_loop)
+                if(!next || !getters.getBox(next)) break;
+                _loop = lodash.cloneDeep(getters.getBox(next))
               }
-              cards.push(_loop)
-              if(!next || !getters.getBox(next)) break;
-              _loop = lodash.cloneDeep(getters.getBox(next))
             }
+            return cards
+          }catch{
+            alert('Data Format Error!!!\nSorry, give the refresh the page.')
+            location.reload();
+            return []
           }
-          return cards
+
         },
         getBox(state){
             return (id) => state.boxes.find(i => i.id == id)
@@ -260,8 +267,11 @@ const store = new Vuex.Store({
           }
         },
 
-        loadBoxes({commit}, boxes){
-          commit('loadBoxes', boxes)
+        loadBot({commit}, data){
+            data.docs && commit('setDocs', data.docs)
+            data.scripts && commit('setScripts', data.scripts)
+            data.ad && commit('setAd', data.ad)
+            commit('setBoxes', data.boxes)
         },
 
         addAdSubToBox({state, commit, getters, dispatch}, {boxId, main, sub}){
@@ -301,14 +311,37 @@ const store = new Vuex.Store({
           for(i in nexts){
             dispatch('removeFlow', nexts[i])
           }
-        }
+        },
+        changeCasesOfBox({state, getters, commit}, {value, cardId}){
+          caseIndex = value.findIndex(i => i.active)
+          commit('setActiveCase', {
+            boxId: cardId,
+            caseIndex
+          })
+          commit('changeCasesOfBox', {
+            value: value.map(i => {
+              delete i.active;
+              return i
+            }),
+            box: getters.getBox(cardId)
+          })
+        },
     },
     mutations: {
         initBoxes(state){
           state.boxes = []
         },
-        loadBoxes(state, boxes){
+        setBoxes(state, boxes){
           state.boxes = boxes
+        },
+        setDocs(state, docs){
+          state.boxes = docs
+        },
+        setScripts(state, scripts){
+          state.scripts = scripts
+        },
+        setAd(state, ad){
+          state.ad = ad
         },
         setCards(state, cards){
             state.cards = cards
@@ -321,6 +354,9 @@ const store = new Vuex.Store({
         },
         changeCase(state, {caseItem, content}){
             caseItem.content = content
+        },
+        changeCasesOfBox(state, {value, box}){
+          box.cases = value
         },
         deleteCaseFromBox(state, {box, caseIndex}){
             box.cases.splice(caseIndex, 1);
@@ -377,14 +413,20 @@ const store = new Vuex.Store({
           obj[main].push(sub)
           state.ad = {...obj}
         },
-        changeCasesOfBox(state, {box, cases}){
-          box.cases = cases
+        changeCasesOfBox(state, {value, box}){
+          box.cases = value
         }
     }
 });
 
 Vue.component('new-box', {
     template: '#new-box-template',
+    props: {
+      'prevCardAction': {
+        type: String,
+        default: null
+      }
+    },
     computed: {
       mains(){
         return this.$store.getters.mains
@@ -392,6 +434,12 @@ Vue.component('new-box', {
       subs(){
         return (main) => this.$store.getters.subs(main)
       }
+    },
+    mounted(){
+      $(".inputing")[0].focus()
+    },
+    updated(){
+      $(".inputing")[0].focus()
     },
     data(){
       return {
@@ -412,11 +460,25 @@ Vue.component('new-box', {
 })
 
 Vue.component('card-hs', {
-    props: ['card'],
+    props: ['card', 'is-insert'],
     template: '#card-hs-template',
     data(){
       return {
-        next: null
+        next: null,
+        drag: false
+      }
+    },
+    computed: {
+      cases: {
+        get(){
+          return this.card.cases
+        },
+        set(value){
+          this.$store.dispatch('changeCasesOfBox', {
+            value,
+            cardId: this.card.id
+          })
+        }
       }
     },
     methods: {
@@ -433,12 +495,19 @@ Vue.component('card-hs', {
               next: self.next
             })
           })
+        },
+        onMove({ relatedContext, draggedContext }) {
+          const relatedElement = relatedContext.element;
+          const draggedElement = draggedContext.element;
+          // return (
+          //   (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
+          // );
         }
     }
 })
 
 Vue.component('card-as', {
-    props: ['card', 'card-idx'],
+    props: ['card', 'card-idx', 'is-insert'],
     template: '#card-as-template',
     data(){
       return {
@@ -461,7 +530,7 @@ Vue.component('card-as', {
 })
 
 Vue.component('card-ad', {
-    props: ['card', 'card-idx'],
+    props: ['card', 'card-idx', 'is-insert'],
     template: '#card-ad-template',
     data(){
       return {
@@ -712,6 +781,15 @@ Vue.component('new-step-btn', {
   }
 })
 
+Vue.component('remove-step-btn', {
+  template: '#remove-step-btn-template',
+  methods: {
+    clickHandler: function(){
+      this.$store.dispatch('setNewStepPosition', 0)
+    }
+  }
+})
+
 Vue.component('new-image-btn', {
   props: ['id'],
   template: '#new-image-btn-template',
@@ -813,9 +891,16 @@ const vm = new Vue({
         }
     },
 
+    updated(){
+      // this.$nextTick(() => {
+      //   this.$refs.inputing.focus()
+      // })
+    },
+
     watch: {
       boxes: () => {
         this.isChanged = true
+       
       }
     },
 
@@ -852,14 +937,18 @@ const vm = new Vue({
                 dataType: 'json',
                 success: function(response) {
                   vm.waiting = false
-                  vm.botKey = response.password.en; // .de  .fr  .ja
+                  try{
+                    vm.botKey = response.password.en; // .de  .fr  .ja
 
-                  if(response.message){
-                      alert(response.message);
-                    isBuild = true
-                    isChange = false
-                  }else{
-                      alert('Something happend!!!')
+                    if(response.message){
+                        alert(response.message);
+                      isBuild = true
+                      isChange = false
+                    }else{
+                        alert('Something happend!!!')
+                    }
+                  }catch{
+                    alert("The bot is still being built in the background. You should be able to use in about 1 minute.")
                   }
                 },
                 error: function(){
@@ -876,7 +965,7 @@ const vm = new Vue({
           alert('Input name to load the Bot')
           return
         }
-        e.preventDefault();
+        // e.preventDefault();
 
         if(!this.isChanged || confirm("The current bot hasn’t been built.\n Shall I still load a new bot?")){
             if(this.isSaved){
@@ -896,19 +985,18 @@ const vm = new Vue({
                     },
                     dataType:'json',
                     beforeSend: function() {
-                        this.waiting = true
+                        vm.waiting = true
                     },
                     success: (res) => {
-                        this.waiting  = false
+                        vm.waiting  = false
                         if(res.message){
                           alert(res.message);
                         }else if(res.data){
-                          this.savingBotId = this.loadingBotId
+                          vm.savingBotId = this.loadingBotId
                           this.isBuilt = true
                           this.isChanged = false
-                          let data = res.data
 
-                          this.$store.dispatch('loadBoxes', data)
+                          this.$store.dispatch('loadBot', res.data)
                         }else{
                             alert("Something is wrong!");
                         }
@@ -935,10 +1023,10 @@ const vm = new Vue({
         //   return
         // }
 
-        // if(!isBuild){
-        //   alert("Warning: Please Build")
-        //   return
-        // }
+        if(!this.botKey){
+          alert("Warning: Please Build")
+          return
+        }
 
         if(!this.boxes.length) {
           alert("Warning: There is no content to build the Bot.")
