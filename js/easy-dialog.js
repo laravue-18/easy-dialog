@@ -460,7 +460,7 @@ Vue.component('new-box', {
 })
 
 Vue.component('card-hs', {
-    props: ['card', 'is-insert'],
+    props: ['card', 'is-insert', 'is-last'],
     template: '#card-hs-template',
     data(){
       return {
@@ -507,7 +507,7 @@ Vue.component('card-hs', {
 })
 
 Vue.component('card-as', {
-    props: ['card', 'card-idx', 'is-insert'],
+    props: ['card', 'card-idx', 'is-insert', 'is-last'],
     template: '#card-as-template',
     data(){
       return {
@@ -530,7 +530,7 @@ Vue.component('card-as', {
 })
 
 Vue.component('card-ad', {
-    props: ['card', 'card-idx', 'is-insert'],
+    props: ['card', 'card-idx', 'is-insert', 'is-last'],
     template: '#card-ad-template',
     data(){
       return {

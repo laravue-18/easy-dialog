@@ -3,11 +3,21 @@ html{
   font-size: 12px;
 }
 input{
-  border:none !important;
+  border: none !important;
   background: white !important;
 }
+.form-control{
+  border-radius: .25rem !important;
+}
+
+.btn-ctm1{
+  background: linear-gradient(to bottom, #fd5500, #922b02);
+  border: 0;
+  border-radius: 0.5rem;
+  color: white;
+}
 </style>
-<div id="easyDialog" style="background: #ec6625;">
+<div id="easyDialog" style="background-image: linear-gradient(to bottom, #ec6625, #3E313E);">
     <div v-if="loading || waiting" id="overlay">
       <div class="cv-spinner">
         <span class="spinner"></span>
@@ -19,14 +29,14 @@ input{
                 <div class="row">
                     <div class="col-6">
                         <div class="input-group">
-                            <input type="text" class="form-control" @change="loadBot" v-model="loadingBotId" placeholder="Bot Name ...">
-                            <button class="btn btn-secondary" type="button" @click="loadBot">Load</button>
+                            <input type="text" class="form-control border-0 rounded-3 me-2" @change="loadBot" v-model="loadingBotId" placeholder="Bot Name ...">
+                            <button class="btn text-white border border-white rounded" type="button" @click="loadBot">Load</button>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="col-6 input-group">
-                            <input type="text" class="form-control" @change="saveBot" v-model="savingBotId" placeholder="Bot Name ...">
-                            <button class="btn btn-secondary" @click="saveBot" type="button">Save</button>
+                            <input type="text" class="form-control border-0 rounded-3 me-2" @change="saveBot" v-model="savingBotId" placeholder="Bot Name ...">
+                            <button class="btn text-white border border-white rounded" @click="saveBot" type="button">Save</button>
                         </div>
                     </div>
                 </div>
@@ -36,10 +46,10 @@ input{
             <div class="col-lg-5">
                 <div class="row">
                     <div class="col-6">
-                        <a href="https://easydialog.org/easybot-design-and-run-ai-bots-fast/" class="btn btn-secondary d-block" target="[_blank]">Help / How-To</a>
+                        <a href="https://easydialog.org/easybot-design-and-run-ai-bots-fast/" class="btn btn-ctm1 d-block shadow" target="[_blank]">Help / How-To</a>
                     </div>
                     <div class="col-6 d-grid">
-                        <button class="btn btn-secondary">Own Your Bot</button>
+                        <button class="btn btn-ctm1 shadow">Own Your Bot</button>
                     </div>
                 </div>
             </div>
@@ -47,34 +57,34 @@ input{
 
         <div class="row">
             <div class="col-6 pt-2">
-                <span class="h4">Bot Keys : </span>
-                <span class="h4">{{ botKey }} </span>
+                <span class="h4 text-white">Bot Keys : </span>
+                <span class="h4 text-white">{{ botKey }} </span>
             </div>
             <div class="col-6 text-end">
-                <button class="btn btn-secondary mb-2" @click="buildBot">Build easyBot</button>
+                <button class="btn btn-ctm1 shadow mb-2" @click="buildBot">Build easyBot</button>
             </div>
         </div>
 
-        <div class="rounded shadow bg-white overflow-hidden">
-            <div class="bg-light">
+        <div class="">
+            <div class="">
                 <div class="row border-bottom">
-                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">Human Says : </h3></div>
-                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">AI Says : </h3></div>
-                    <div class="col-4"><h3 class="p-2 mt-2 mb-0">AI Does : </h3></div>
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0 text-white">Human Says : </h3></div>
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0 text-white">AI Says : </h3></div>
+                    <div class="col-4"><h3 class="p-2 mt-2 mb-0 text-white">AI Does : </h3></div>
                 </div>
             </div>
-            <div class="p-2 overflow-scroll" style="height: 600px;">
+            <div class="p-2" style="height: 600px; overflow-y: auto; overflow-x: hidden;">
               <div v-for="(card, index) in cards" :key="index">
                 <new-box v-if="newStepPosition == card.id" :prev-card-action="cards[index - 1]?.action"></new-box>
                 <div class="row mb-1">
                     <div class="col-4">
-                        <card-hs v-if="card.action == 'hs'" :card="card" :is-insert="newStepPosition == card.id"></card-hs>
+                        <card-hs v-if="card.action == 'hs'" :card="card" :is-insert="newStepPosition == card.id" :is-last="index == (cards.length - 1)"></card-hs>
                     </div>
                     <div class="col-4">
-                        <card-as v-if="card.action == 'as'" :card="card" :is-insert="newStepPosition == card.id"></card-as>
+                        <card-as v-if="card.action == 'as'" :card="card" :is-insert="newStepPosition == card.id" :is-last="index == (cards.length - 1)"></card-as>
                     </div>
                     <div class="col-4">
-                        <card-ad v-if="card.action == 'ad'" :card="card" :is-insert="newStepPosition == card.id"></card-ad>
+                        <card-ad v-if="card.action == 'ad'" :card="card" :is-insert="newStepPosition == card.id" :is-last="index == (cards.length - 1)"></card-ad>
                     </div>
                 </div>
               </div>
@@ -83,7 +93,7 @@ input{
         </div>
 
         <div class="py-3 d-flex align-items-center">
-            <h5 class="me-3 mb-0">Register Similar Words :</h5>
+            <h5 class="me-3 mb-0 text-white">Register Similar Words :</h5>
             <div class="input-group" style="width: 400px;">
                 <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
                 <button class="btn btn-secondary" type="button" id="inputGroupFileAddon04">Send</button>
@@ -118,7 +128,7 @@ input{
     <div>
         <the-card>
           <div class="d-md-flex justify-content-between mb-1">
-            <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+            <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
                 <template v-if="card.next=='0'">
                   <change-next-btn :id="card.id"/>
@@ -161,7 +171,7 @@ input{
           >
           <div class="d-md-flex justify-content-end align-items-center mt-2">
               <div class="">
-                  <div v-if="card.next">
+                  <div v-if="card.next && isLast">
                       <h6>Next step: <strong> #{{ card.next}}</strong></h6>
                   </div>
               </div>
@@ -174,7 +184,7 @@ input{
     <div>
         <the-card>
           <div class="d-md-flex justify-content-between mb-1">
-            <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+            <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
                 <template v-if="card.next == '0'">
                   <change-next-btn :id="card.id"/>
@@ -226,7 +236,7 @@ input{
             ></div>
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
-                    <div v-if="card.next">
+                    <div v-if="card.next && isLast">
                         <span>Next step: <strong> #{{ card.next}}</strong></span>
                     </div>
                 </div>
@@ -240,7 +250,7 @@ input{
     <div :key="renderKey">
         <the-card>
           <div class="d-md-flex justify-content-between mb-1">
-            <h6 class="mb-0 ps-2">#{{card.id}}</h6>
+            <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
                 <template v-if="card.next == '0'">
                   <change-next-btn :id="card.id"/>
@@ -325,7 +335,7 @@ input{
             </div>
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
-                    <div v-if="card.next">
+                    <div v-if="card.next && isLast">
                         <span>Next step: <strong> #{{ card.next}}</strong></span>
                     </div>
                 </div>
@@ -339,13 +349,13 @@ input{
 <script type="text/x-template" id="new-box-template">
     <div class="row py-1" :key='renderKey'>
         <div class="col-4">
-            <input type="text" class="form-control focusElement border inputing" placeholder="Type Human Sentence"
+            <input type="text" class="form-control focusElement rounded-3 border-0 inputing" placeholder="Type Human Sentence"
               @change="addNewBox('hs', $event)"
               v-if="prevCardAction != 'hs'"
             >
         </div>
         <div class="col-4">
-            <input type="text" class="form-control border inputing" placeholder="Type AI Sentence"
+            <input type="text" class="form-control rounded-3 border-0 inputing" placeholder="Type AI Sentence"
               @change="addNewBox('as', $event)"
               v-if="prevCardAction != 'as'"
             >
@@ -372,19 +382,19 @@ input{
 </script>
 
 <script type="text/x-template" id="the-card-template">
-    <div class="rounded shadow bg-light bg-gradient p-2">
+    <div class="">
         <slot></slot>
     </div>
 </script>
 
 <script type="text/x-template" id="the-card-button-template">
-    <button class="btn btn-outline-secondary p-0 px-1" :title="title">
+    <button class="btn btn-outline-light p-0 px-1" :title="title">
         <slot></slot>
     </button>
 </script>
 
 <script type="text/x-template" id="change-next-btn-template">
-    <button class="btn btn-outline-secondary p-0 px-1"
+    <button class="btn btn-outline-light p-0 px-1"
       title="Change Next Step"
       data-bs-toggle="modal" data-bs-target="#nextStepModal"
     >
@@ -393,7 +403,7 @@ input{
 </script>
 
 <script type="text/x-template" id="new-step-btn-template">
-    <button class="btn btn-outline-secondary p-0 px-1" title="Insert New Step Before This Step"
+    <button class="btn btn-outline-light p-0 px-1" title="Insert New Step Before This Step"
       @click="clickHandler"
     >
       +
@@ -401,7 +411,7 @@ input{
 </script>
 
 <script type="text/x-template" id="remove-step-btn-template">
-    <button class="btn btn-outline-secondary p-0 px-1" title="Remove This New Step"
+    <button class="btn btn-outline-light p-0 px-1" title="Remove This New Step"
       @click="clickHandler"
     >
       -
@@ -416,7 +426,7 @@ input{
       style="visibility:hidden; height: 0;"
       @change="updateImage"
     >
-    <button class="btn btn-outline-secondary p-0 px-1" title="Upload Image File"
+    <button class="btn btn-outline-light p-0 px-1" title="Upload Image File"
       @click="clickHandler"
     >
         <i class="bi-image"></i>
@@ -432,7 +442,7 @@ input{
       style="visibility:hidden; height: 0;"
       @change="updateImage"
     >
-    <button class="btn btn-outline-secondary p-0 px-1" title="Upload Script File"
+    <button class="btn btn-outline-light p-0 px-1" title="Upload Script File"
       @click="clickHandler"
     >
         <i class="bi-file-text"></i>
