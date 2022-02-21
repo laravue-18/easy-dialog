@@ -2,6 +2,9 @@
 html{
   font-size: 12px;
 }
+body{
+  font-size: 1rem;
+}
 input{
   border: none !important;
   background: white !important;
@@ -24,6 +27,7 @@ input{
       </div>
     </div>
     <div v-if="!loading" class="container">
+      <div v-if="isAuthorized">
         <div class="row py-3">
             <div class="col-lg-5 mb-2 mb-lg-0">
                 <div class="row">
@@ -94,34 +98,35 @@ input{
 
         <div class="py-3 d-flex align-items-center">
             <h5 class="me-3 mb-0 text-white">Register Similar Words :</h5>
-            <div class="input-group" style="width: 400px;">
-                <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-                <button class="btn btn-secondary" type="button" id="inputGroupFileAddon04">Send</button>
+            <div class="d-flex align-items-center" style="width: 400px;">
+                <input type="file" class="form-control me-2" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                <button class="btn btn-outline-light rounded-3" type="button" id="inputGroupFileAddon04">Send</button>
             </div>
-            <button class="btn btn-secondary rounded-circle ms-2 text-bold">?</button>
+            <button class="btn btn-outline-light rounded-circle ms-2 text-bold">?</button>
         </div>
-    </div>
+      </div>
 
-    <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Select</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <select class="form-control" v-model="next">
-              <option v-for="id in boxes.map(i => i.id)" value="id">{{id}}</option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" @click="setNext(row.id)">Save changes</button>
+      <div v-else class="h-full d-flex justify-content-center align-items-center">
+        <div class="col-md-4">
+          <div class="py-5">
+            <div class="form-group mb-4">
+              <label for="exampleInputEmail1" class="text-white fw-bold">Username</label>
+              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" v-model="username">
+              <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
+            </div>
+            <div class="form-group mb-4">
+              <label for="exampleInputPassword1" class="text-white fw-bold">Password</label>
+              <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" v-model="password">
+            </div>
+            <!-- <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="exampleCheck1">
+              <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div> -->
+            <button type="submit" class="btn btn-primary" @click="logIn">Submit</button>
           </div>
         </div>
       </div>
     </div>
-
 </div>
 
 <script type="text/x-template" id="card-hs-template">
@@ -130,7 +135,7 @@ input{
           <div class="d-md-flex justify-content-between mb-1">
             <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
-                <template v-if="card.next=='0'">
+                <template v-if="isLast">
                   <change-next-btn :id="card.id"/>
                   <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -141,11 +146,13 @@ input{
                         </div>
                         <div class="modal-body">
                           <select class="form-control" v-model="next">
+                            <option value="" disabled selected hidden>Select Next Step</option>
                             <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
                           </select>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" @click="removeNext()">Remove Next</button>
                           <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
                         </div>
                       </div>
@@ -172,7 +179,7 @@ input{
           <div class="d-md-flex justify-content-end align-items-center mt-2">
               <div class="">
                   <div v-if="card.next && isLast">
-                      <h6>Next step: <strong> #{{ card.next}}</strong></h6>
+                      <h6 class="text-warning">Next step: <strong> #{{ card.next}}</strong></h6>
                   </div>
               </div>
           </div>
@@ -186,7 +193,7 @@ input{
           <div class="d-md-flex justify-content-between mb-1">
             <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
-                <template v-if="card.next == '0'">
+                <template v-if="isLast">
                   <change-next-btn :id="card.id"/>
                   <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -202,6 +209,7 @@ input{
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" @click="removeNext()">Remove Next</button>
                           <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
                         </div>
                       </div>
@@ -237,7 +245,7 @@ input{
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
                     <div v-if="card.next && isLast">
-                        <span>Next step: <strong> #{{ card.next}}</strong></span>
+                        <span class="text-warning">Next step: <strong> #{{ card.next}}</strong></span>
                     </div>
                 </div>
 
@@ -252,7 +260,7 @@ input{
           <div class="d-md-flex justify-content-between mb-1">
             <h6 class="mb-0 ps-2 text-white">#{{card.id}}</h6>
             <div>
-                <template v-if="card.next == '0'">
+                <template v-if="isLast">
                   <change-next-btn :id="card.id"/>
                   <div class="modal fade" id="nextStepModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -268,6 +276,7 @@ input{
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" @click="removeNext()">Remove Next</button>
                           <button type="button" class="btn btn-primary" @click="setNext()">Save changes</button>
                         </div>
                       </div>
@@ -336,7 +345,7 @@ input{
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
                     <div v-if="card.next && isLast">
-                        <span>Next step: <strong> #{{ card.next}}</strong></span>
+                        <span class="text-warning">Next step: <strong> #{{ card.next}}</strong></span>
                     </div>
                 </div>
 
@@ -451,7 +460,7 @@ input{
 </script>
 
 <script type="text/x-template" id="the-card-case-template">
-    <div class="position-relative bg-gradient px-2 py-1 text-light d-flex justify-content-between align-items-center mb-1" :class="active?'bg-primary':'bg-secondary'">
+    <div class="position-relative bg-gradient px-2 py-1 text-light d-flex justify-content-between align-items-center mb-1 rounded-3" :class="active?'bg-primary':'bg-secondary'">
         <div class="w-100" @click="handleClick">
             {{content}}
         </div>

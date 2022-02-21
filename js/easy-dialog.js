@@ -496,6 +496,16 @@ Vue.component('card-hs', {
             })
           })
         },
+        removeNext(){
+          jQuery('#nextStepModal').modal('hide')
+          self = this
+          jQuery('#nextStepModal').on('hidden.bs.modal', function (e) {
+            self.$store.dispatch('setNextOfCase', {
+              boxId: self.card.id,
+              next: 0
+            })
+          })
+        },
         onMove({ relatedContext, draggedContext }) {
           const relatedElement = relatedContext.element;
           const draggedElement = draggedContext.element;
@@ -525,7 +535,16 @@ Vue.component('card-as', {
           })
         })
       },
-
+      removeNext(){
+        jQuery('#nextStepModal').modal('hide')
+        self = this
+        jQuery('#nextStepModal').on('hidden.bs.modal', function (e) {
+          self.$store.dispatch('setNextOfCase', {
+            boxId: self.card.id,
+            next: 0
+          })
+        })
+      },
     }
 })
 
@@ -647,7 +666,17 @@ Vue.component('card-ad', {
             next: self.next
           })
         })
-      }
+      },
+      removeNext(){
+        jQuery('#nextStepModal').modal('hide')
+        self = this
+        jQuery('#nextStepModal').on('hidden.bs.modal', function (e) {
+          self.$store.dispatch('setNextOfCase', {
+            boxId: self.card.id,
+            next: 0
+          })
+        })
+      },
     }
 })
 
@@ -868,6 +897,9 @@ const vm = new Vue({
     store,
     data(){
         return {
+            isAuthorized: false,
+            username: null,
+            password: null,
             loading: false,
             waiting: false,
             next: null,
@@ -909,6 +941,38 @@ const vm = new Vue({
     },
 
     methods: {
+      logIn(){
+        this.waiting = true
+        // $.ajax({
+        //     type: 'POST',
+        //     url: url,
+        //     xhrFields: { withCredentials: true},
+        //     data:{
+        //       action:'build_bot_dev',
+        //       param:{
+        //           data:{
+        //             username: this.username,
+        //             password: this.password,
+        //           },
+        //       }
+        //     },
+
+        //     dataType: 'json',
+        //     success: function(response) {
+        //       vm.waiting = false
+        //       if(response.success){
+        //         this.isAuthorized = true
+        //       }
+        //     },
+        //     error: function(){
+        //         vm.waiting = false
+        //         alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
+        //     },
+        //     timeout: 300000
+        // });
+        this.waiting = false
+        this.isAuthorized = true
+      },
       buildBot(){
         if(browser && ip){
           if(!this.boxes.length){
