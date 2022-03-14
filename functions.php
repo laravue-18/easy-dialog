@@ -25,30 +25,36 @@ function bootstrap_enqueue_scripts() {
         wp_enqueue_script( 'lodash-new', get_stylesheet_directory_uri() . '/js/lodash.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
         wp_enqueue_script( 'vuex', get_stylesheet_directory_uri() . '/js/vuex.js');
-        wp_enqueue_script( 'Sortable', get_stylesheet_directory_uri() . '/js/Sortable@1.8.4.min.js');
+        wp_enqueue_script( 'Sortable', get_stylesheet_directory_uri() . '/js/Sortable.js');
         wp_enqueue_script( 'vuedraggable', get_stylesheet_directory_uri() . '/js/vuedraggable.min.js');
         wp_enqueue_script( 'sweetalert', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js');
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
     }
-    
+    // developer gui
     if(is_page(array(2497))){
         wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog.js', 'vuejs', '', true);
     }
-    
+    // noiman gui
     if(is_page(array(2734))){
-        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging.js', 'vuejs', '', true);
     }
-    
+    // andres gui
     if(is_page(array(3828))){
-        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
-        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging-old.js', 'vuejs', '', true);
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
+        // wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging-old.js', 'vuejs', '', true);
+        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-staging.js', 'vuejs', '', true);
     }
-    
+    // old bot loading page
     if(is_page(array(3859))){
         wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog-old.css');
         wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-dialog-old-bot-loading.js', 'vuejs', '', true);
+    }
+    // easychat only page
+    if(is_page(array(1898))){
+        wp_enqueue_style( 'easydialog', get_stylesheet_directory_uri() . '/css/easy-dialog.css');
+        wp_enqueue_script( 'easydialog', get_stylesheet_directory_uri() . '/js/easy-chat(demo).js', 'vuejs', '', true);
     }
     
 }

@@ -3,7 +3,7 @@ html{
   font-size: 12px;
 }
 body{
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 input{
   border: none !important;
@@ -18,6 +18,12 @@ input{
   border: 0;
   border-radius: 0.5rem;
   color: white;
+}
+.btn-ctm1:hover{
+  color: yellow !important;
+}
+.btn:hover{
+  transform: translate(-1px, -2px);
 }
 </style>
 <div id="easyDialog" style="background-image: linear-gradient(to bottom, #ec6625, #3E313E);">
@@ -65,7 +71,7 @@ input{
                 <span class="h4 text-white">{{ botKey }} </span>
             </div>
             <div class="col-6 text-end">
-                <button class="btn btn-ctm1 shadow mb-2" @click="buildBot">Build easyBot</button>
+                <button class="btn btn-lg btn-ctm1 shadow mb-2" @click="buildBot">Build easyBot</button>
             </div>
         </div>
 
@@ -141,13 +147,13 @@ input{
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                          <h5 class="modal-title" id="exampleModalLabel">Select the next case</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                           <select class="form-control" v-model="next">
-                            <option value="" disabled selected hidden>Select Next Step</option>
-                            <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                            <option value="" disabled selected hidden>Select ...</option>
+                            <option v-for="i in $store.state.boxes" :value="i.id">{{i.id}} --- {{Array.isArray(i.cases[0].content) ? i.cases[0].content[0].substr(0, 30) : i.cases[0].content.substr(0, 30)}}</option>
                           </select>
                         </div>
                         <div class="modal-footer">
@@ -199,12 +205,13 @@ input{
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                          <h5 class="modal-title" id="exampleModalLabel">Select the next case</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                           <select class="form-control" v-model="next">
-                            <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                            <option value="" disabled selected hidden>Select ...</option>
+                            <option v-for="i in $store.state.boxes" :value="i.id">{{i.id}} --- {{Array.isArray(i.cases[0].content) ? i.cases[0].content[0].substr(0, 30) : i.cases[0].content.substr(0, 30)}}</option>
                           </select>
                         </div>
                         <div class="modal-footer">
@@ -266,12 +273,13 @@ input{
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Select</h5>
+                          <h5 class="modal-title" id="exampleModalLabel">Select the next case</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                           <select class="form-control" v-model="next">
-                            <option v-for="id in $store.state.boxes.map(i => i.id)" :value="id">{{id}}</option>
+                            <option value="" disabled selected hidden>Select ...</option>
+                            <option v-for="i in $store.state.boxes" :value="i.id">{{i.id}} --- {{Array.isArray(i.cases[0].content) ? i.cases[0].content[0].substr(0, 30) : i.cases[0].content.substr(0, 30)}}</option>
                           </select>
                         </div>
                         <div class="modal-footer">
@@ -470,6 +478,7 @@ input{
             @blur="changeEventHandler($event)"
             @change="changeEventHandler($event)"
             @keypress.enter.prevent="changeEventHandler($event)"
+            @click.stop="testFunc"
         >{{content}}</textarea>
         <span class="text-white" style="cursor: context-menu;" @click="removeEventHandler()">×</span>
     </div>

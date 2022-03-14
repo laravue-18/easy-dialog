@@ -464,7 +464,7 @@ Vue.component('card-hs', {
     template: '#card-hs-template',
     data(){
       return {
-        next: null,
+        next: '',
         drag: false
       }
     },
@@ -521,7 +521,7 @@ Vue.component('card-as', {
     template: '#card-as-template',
     data(){
       return {
-        next: null
+        next: ''
       }
     },
     methods: {
@@ -553,7 +553,7 @@ Vue.component('card-ad', {
     template: '#card-ad-template',
     data(){
       return {
-        next: null,
+        next: '',
         renderKey: 0
       }
     },
@@ -710,6 +710,7 @@ Vue.component('the-card-case', {
                 this.timer = setTimeout(function(){
                     if(self.action == 'hs'){
                         self.activeCase()
+                        console.log('click')
                     }else{
                         console.log('click')
                     }
@@ -786,6 +787,10 @@ Vue.component('the-card-case', {
             });
           }
 
+        },
+        testFunc: function(event){
+          event.stopImmediatePropagation()
+          console.log('checkingB')
         }
     }
 })
@@ -887,7 +892,7 @@ Vue.component('new-script-btn', {
           })
       };
 
-      reader.readAsDataURL(event.target.files[0]);
+      reader.readAsText(event.target.files[0]);
     }
   }
 })
@@ -897,7 +902,7 @@ const vm = new Vue({
     store,
     data(){
         return {
-            isAuthorized: false,
+            isAuthorized: true,
             username: null,
             password: null,
             loading: false,
@@ -1004,20 +1009,25 @@ const vm = new Vue({
                   try{
                     vm.botKey = response.password.en; // .de  .fr  .ja
 
+                    isBuild = true
+                    isChange = false
                     if(response.message){
                         alert(response.message);
-                      isBuild = true
-                      isChange = false
                     }else{
                         alert('Something happend!!!')
                     }
                   }catch{
                     alert("The bot is still being built in the background. You should be able to use in about 1 minute.")
+                    isBuild = true
+                    isChange = false
+                    vm.botKey = 'No Bot Key be returned'
                   }
                 },
                 error: function(){
                     vm.waiting = false
                     alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
+                    isBuild = true
+                    isChange = false
                 },
                 timeout: 300000
             });
