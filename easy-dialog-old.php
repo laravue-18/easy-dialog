@@ -175,7 +175,7 @@
                 </div>
               </template>
             </div>
-            <template v-for="(row, index) in rows()" :key="index">
+            <template v-for="(row, index) in rows()" :key="row">
               <div class="asRow">
                 <div class="rowNumber d-flex align-items-end">
                   <button class="btn btn-light rounded-circle p-0" style="width: 2rem; height: 2rem;" @click="toggleInsert(row.id)">

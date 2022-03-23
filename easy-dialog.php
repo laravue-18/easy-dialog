@@ -32,6 +32,21 @@ input{
         <span class="spinner"></span>
       </div>
     </div>
+
+    <div id="slotModal" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+      <div class="modal-dialog" style="margin-top: 150px">
+        <div class="modal-content" style="padding:15px">
+          <h5>Do you want to name this list of words "<span id="slotname_span"></span>"? If not please, please change the name to a word of your choice?</h5>
+          <input type="text" class="form-control" id="slotname" style="border: 1px solid #ddd !important; margin-bottom: 15px;">
+          <div>
+              <button id="slotname_submit" type="button" class="btn btn-primary mr-4" style="color: white">Submit</button>
+              <button id="slotname_cancel" type="button" class="btn btn-secondary" style="">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div v-if="!loading" class="container">
       <div v-if="isAuthorized">
         <div class="row py-3">
@@ -105,10 +120,18 @@ input{
         <div class="py-3 d-flex align-items-center">
             <h5 class="me-3 mb-0 text-white">Register Similar Words :</h5>
             <div class="d-flex align-items-center" style="width: 400px;">
-                <input type="file" class="form-control me-2" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-                <button class="btn btn-outline-light rounded-3" type="button" id="inputGroupFileAddon04">Send</button>
+                <input type="file" class="form-control me-2" name="similar_words" id="similar_words" @change="changeSimilarWords">
+                <button id="submit_words" class="btn btn-outline-light rounded-3" type="button" @click="sendSimilarWords">Send</button>
             </div>
-            <button class="btn btn-outline-light rounded-circle ms-2 text-bold">?</button>
+            <button class="btn btn-outline-light rounded-circle ms-2 text-bold"
+              style="width: 34px; height: 34px; background: transparent; border:1px solid #fff; border-radius: 9999px; color: white;" 
+              id="tooltip-target-1"
+            >?</button>
+            <b-tooltip target="tooltip-target-1" triggers="hover">
+              <p style='text-align: justify;'>
+                Sometimes you want your bot to treat a group of words in the same way. For example, you have a group of friends called John, Jim and Mary. If you design a phone call bot, in easyBot you only need to add a sentence like “Call John on his phone”, and add Jim and Mary as “similar” words to John by uploading a text file, that lists John, Jim and Mary in separate lines. After this, any of your bot users can also say “Call Jim on his phone” or “Call Mary on her phone”, and get the same bot flow that you defined for “Call John on his phone”.Place names, time and date, and other common groups of similar words are automatically recognized by easyBot. They do not need to be registered.
+            </P>
+            </b-tooltip>
         </div>
       </div>
 

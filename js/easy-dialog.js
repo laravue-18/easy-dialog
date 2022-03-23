@@ -35,6 +35,16 @@ jQuery.getJSON("https://api.ipify.org?format=json", function(data) {
   }
 });
 
+$(function(){
+  
+  jQuery('#slotname_cancel').click(function(){
+    jQuery('#slotModal').modal('hide')
+  })
+
+  var slots = {}
+
+})
+
 var url = 'https://easydialog.org/wp-admin/admin-ajax.php'
 
 const store = new Vuex.Store({
@@ -418,6 +428,8 @@ const store = new Vuex.Store({
         }
     }
 });
+
+Vue.use(BootstrapVue)
 
 Vue.component('new-box', {
     template: '#new-box-template',
@@ -913,7 +925,8 @@ const vm = new Vue({
             savingBotId: '',
             isChanged: false,
             isBuilt: false,
-            isSaved: true
+            isSaved: true,
+            slots: {}
         }
     },
     computed: {
@@ -978,6 +991,35 @@ const vm = new Vue({
         this.waiting = false
         this.isAuthorized = true
       },
+      getKey(){
+        let timer = setInterval(() => {
+          $.ajax({
+            type: 'POST',
+            url: url,
+            xhrFields: { withCredentials: true},
+            data:{
+              action:'get_bot_key',
+              param:{
+                  user_id: browser + ip
+              }
+            },
+            dataType: 'json',
+            success: function(response) {
+              if(response.password){
+                vm.botKey = response.password;
+                clearInterval(timer);
+              }
+            },
+          });
+        }, 30000);
+
+        setTimeout(() => { 
+          clearInterval(timer); 
+          if(!vm.botKey){
+            alert('Bot did not build correctly, please contact info@easydialog.org'); 
+          }
+        }, 10 * 60 * 1000);
+      },
       buildBot(){
         if(browser && ip){
           if(!this.boxes.length){
@@ -1004,28 +1046,28 @@ const vm = new Vue({
                 },
 
                 dataType: 'json',
-                success: function(response) {
+                success: (response) => {
                   vm.waiting = false
-                  try{
+                  
+                  isBuild = true
+                  isChange = false
+                  if(response.password && response.password.en){
                     vm.botKey = response.password.en; // .de  .fr  .ja
+                  }else{
+                    // vm.botKey = 'No Bot Key be returned'
+                    this.getKey();
+                    alert('Bot is being built in the background. This might take a few minutes.  Once the bot is completed, you can use it using the botkey displayed in the upper left corner of this site')
+                  }
 
-                    isBuild = true
-                    isChange = false
-                    if(response.message){
-                        alert(response.message);
-                    }else{
-                        alert('Something happend!!!')
-                    }
-                  }catch{
+                  if(response.message){
+                    alert(response.message)
+                  }else{
                     alert("The bot is still being built in the background. You should be able to use in about 1 minute.")
-                    isBuild = true
-                    isChange = false
-                    vm.botKey = 'No Bot Key be returned'
                   }
                 },
                 error: function(){
                     vm.waiting = false
-                    alert("There was an issue building your Bot. Please click \"Build easyBot\" again to try again.");
+                    alert("Building Bots is not possible right now, please try again later");
                     isBuild = true
                     isChange = false
                 },
@@ -1153,6 +1195,64 @@ const vm = new Vue({
             timeout: 30000
         });
 
+      },
+      sendSimilarWords(){
+        this.waiting = true
+        $.ajax({
+          type: 'POST',
+          url: url,
+          xhrFields: { withCredentials: true },
+    
+          data:{
+            action:'save_bot_dev',
+            param:{
+                slots: this.slots
+            }
+          },
+    
+          dataType: 'json',
+    
+          success: function(response) {
+            vm.waiting = false
+            if(response.slotname){
+              jQuery('#slotModal').modal('show')
+              jQuery('#slotname').val(response.slotname)
+              jQuery('#slotname_span').text(response.slotname)
+            }else{
+              alert(response)
+            }
+          },
+          error: function(){
+            vm.waiting = false
+          },
+          timeout: 300000
+        });
+      },
+      changeSimilarWords(event){
+        if(event.target.files[0].size > 1000000){
+          alert('File Size should smaller than 1M')
+          return false;
+        }
+        
+        let filename = event.target.files[0].name
+        
+        if(!/^[a-zA-Z0-9-_]+$/.test(filename.split('.')[0])){
+          event.target.value = null
+          alert('File name is wrong. File name should include only alphabet letters, digits, and underline (_)')
+          return false
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          this.slots = {
+            'slots_file_name': filename,
+            'slots_data': e.target.result,
+            user_id: browser + ip
+          }
+        };
+        
+        reader.readAsText(event.target.files[0]);
       }
     }
 })

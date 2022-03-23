@@ -21,6 +21,7 @@ function bootstrap_enqueue_scripts() {
 
         wp_enqueue_style( 'fontawesome', 'https://pro.fontawesome.com/releases/v5.10.0/css/all.css');
         wp_enqueue_style( 'bootstrap-icon', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css');
+        wp_enqueue_style( 'bootstrapvue', "//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css");
         wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri() . '/js/bootstrap.bundle.min.js');
         wp_enqueue_script( 'lodash-new', get_stylesheet_directory_uri() . '/js/lodash.js');
         wp_enqueue_script( 'vuejs', get_stylesheet_directory_uri() . '/js/vue.js');
@@ -28,6 +29,7 @@ function bootstrap_enqueue_scripts() {
         wp_enqueue_script( 'Sortable', get_stylesheet_directory_uri() . '/js/Sortable.js');
         wp_enqueue_script( 'vuedraggable', get_stylesheet_directory_uri() . '/js/vuedraggable.min.js');
         wp_enqueue_script( 'sweetalert', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js');
+        wp_enqueue_script( 'bootstrapvue', "//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js");
         wp_enqueue_script( 'easychat', get_stylesheet_directory_uri() . '/js/easy-chat.js', '', '', true);
     }
     // developer gui
@@ -75,6 +77,31 @@ add_filter( 'http_request_timeout', 'wp9838c_timeout_extend' );
 function wp9838c_timeout_extend( $time )
 {
     return 10;
+}
+
+function myCurl($url){
+    if (isset($_POST['param']) && is_array($_POST['param'])) {    
+        $param = wp_json_encode($_POST['param']);
+                   
+        $result = wp_remote_post( $url, array(
+                'timeout' => 120,
+                'redirection' => 5,
+                'blocking' => true,
+                //'headers'   => array('Content-Type' => 'application/json; charset=utf-8'),
+                'body' => $param,
+            )
+        );
+
+        if ( is_wp_error( $result ) ) {
+            $error_message = $result->get_error_message();
+            echo "Wordpress Error: $error_message";
+            wp_die();
+        } else {
+            $body = wp_remote_retrieve_body( $result);
+            $data = json_decode($body);
+            wp_send_json($data);
+        }
+    }
 }
 
 add_action( 'wp_ajax_hello', 'blah_do_ajax_hello' );
@@ -163,18 +190,16 @@ add_action( 'wp_ajax_nopriv_load_bot_dev', 'ajax_func_dev' );
 add_action( 'wp_ajax_save_bot_dev', 'ajax_func_dev' );
 add_action( 'wp_ajax_nopriv_save_bot_dev', 'ajax_func_dev' );
 
-// build_bot_dev
-add_action( 'wp_ajax_build_bot_dev', 'ajax_func_dev' );
-add_action( 'wp_ajax_nopriv_build_bot_dev', 'ajax_func_dev' );
-
 // bot_paid_dev
 add_action( 'wp_ajax_bot_paid_dev', 'ajax_func_dev' );
 add_action( 'wp_ajax_nopriv_bot_paid_dev', 'ajax_func_dev' );
 
+add_action( 'wp_ajax_build_bot_dev', 'ajax_func_dev' );
+add_action( 'wp_ajax_nopriv_build_bot_dev', 'ajax_func_dev' );
+
 
 function ajax_func_dev() {
     $url = 'https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/LambdaBackendStaging';
-    //$url = 'https://api.github.com';
 
 	if (isset($_POST['param']) && is_array($_POST['param'])) {    
       	$param = wp_json_encode($_POST['param']);
@@ -198,6 +223,24 @@ function ajax_func_dev() {
             wp_send_json($data);
         }
     }
+}
+
+// // build_bot_dev
+// add_action( 'wp_ajax_build_bot_dev', 'buildBot' );
+// add_action( 'wp_ajax_nopriv_build_bot_dev', 'buildBot' );
+
+// function buildBot(){
+//     myCurl('https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/async');
+// }
+
+
+// Get Bot Key
+add_action( 'wp_ajax_get_bot_key', 'getBotKey' );
+add_action( 'wp_ajax_nopriv_get_bot_key', 'getBotKey' );
+
+
+function getBotKey() {
+    myCurl('https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/chkbk');
 }
 
 
