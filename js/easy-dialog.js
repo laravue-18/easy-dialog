@@ -36,6 +36,46 @@ jQuery.getJSON("https://api.ipify.org?format=json", function(data) {
 });
 
 $(function(){
+  jQuery('#slotname_submit').click(function(){
+    jQuery('#slotModal').modal('hide')
+    slots.slotname = jQuery('#slotname').val()
+    if(!/^[a-zA-Z0-9-_]+$/.test(slots.slotname)){
+      alert('Correct File Name')
+      return false
+    }
+    jQuery.ajax({
+            type: 'POST',
+            url: url,
+            xhrFields: {
+                withCredentials: true
+            },
+  
+            data:{
+              action:'save_bot_dev',
+              param:{
+                  slots,
+                  user_id: browser + ip
+              }
+            },
+  
+            // dataType: 'json',
+  
+            beforeSend: function() {
+                jQuery("#overlay").fadeIn(300);
+            },
+            success: function(response) {
+                jQuery("#overlay").fadeOut(300, function(){
+                    alert(response.message)
+                });
+            },
+            error: function(){
+                jQuery("#overlay").fadeOut(300, function(){
+                    alert("Error");
+                });
+            },
+            timeout: 300000
+        });
+  })
   
   jQuery('#slotname_cancel').click(function(){
     jQuery('#slotModal').modal('hide')
@@ -950,7 +990,6 @@ const vm = new Vue({
     watch: {
       boxes: () => {
         this.isChanged = true
-       
       }
     },
 
@@ -1033,15 +1072,17 @@ const vm = new Vue({
                 url: url,
                 xhrFields: { withCredentials: true},
                 data:{
-                  action:'build_bot_dev',
+                  action: 'build_bot_dev',  // 'build_bot_dev'
                   param:{
-                      data:{
-                        boxes: this.$store.state.boxes,
-                        scripts: this.$store.state.scripts,
-                        docs: this.$store.state.docs,
-                        ad: this.$store.state.ad,
-                      },
-                      user_id: browser + ip
+                    key: "InvocationType",
+                    value: "Event",
+                    data:{
+                      boxes: this.$store.state.boxes,
+                      scripts: this.$store.state.scripts,
+                      docs: this.$store.state.docs,
+                      ad: this.$store.state.ad,
+                    },
+                    user_id: browser + ip
                   }
                 },
 
@@ -1206,7 +1247,8 @@ const vm = new Vue({
           data:{
             action:'save_bot_dev',
             param:{
-                slots: this.slots
+                slots: this.slots,
+                user_id: browser + ip,
             }
           },
     
@@ -1228,6 +1270,7 @@ const vm = new Vue({
           timeout: 300000
         });
       },
+
       changeSimilarWords(event){
         if(event.target.files[0].size > 1000000){
           alert('File Size should smaller than 1M')
@@ -1253,6 +1296,85 @@ const vm = new Vue({
         };
         
         reader.readAsText(event.target.files[0]);
+      },
+      sendSlotsName(){
+        if(!this.slots.slots_file_name){
+          alert('Choose the file.');
+          return;
+        }
+        this.waiting = true
+        $.ajax({
+          type: 'POST',
+          url: url,
+          xhrFields: { withCredentials: true },
+          data:{
+            action:'save_bot_dev',
+            param:{
+                slots_file_name: this.slots.slots_file_name,
+                user_id: browser + ip,
+            }
+          },
+    
+          dataType: 'json',
+    
+          success: function(response) {
+            vm.waiting = false
+            if(response.slotname){
+              jQuery('#slotModal').modal('show')
+              jQuery('#slotname').val(response.slotname)
+              jQuery('#slotname_span').text(response.slotname)
+            }else{
+              alert(response)
+            }
+          },
+          error: function(){
+            vm.waiting = false
+          },
+          timeout: 300000
+        });
+      },
+      submitSlots(){
+        jQuery('#slotModal').modal('hide')
+        slots.slotname = jQuery('#slotname').val()
+        if(!/^[a-zA-Z0-9-_]+$/.test(slots.slotname)){
+          alert('Correct File Name')
+          return false
+        }
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            xhrFields: {
+                withCredentials: true
+            },
+  
+            data:{
+              action:'save_bot_dev',
+              param:{
+                  slots,
+                  user_id: browser + ip
+              }
+            },
+  
+            // dataType: 'json',
+  
+            beforeSend: function() {
+                jQuery("#overlay").fadeIn(300);
+            },
+            success: function(response) {
+                jQuery("#overlay").fadeOut(300, function(){
+                    alert(response.message)
+                });
+            },
+            error: function(){
+                jQuery("#overlay").fadeOut(300, function(){
+                    alert("Error");
+                });
+            },
+            timeout: 300000
+        });
+      },
+      cancelSlots(){
+        jQuery('#slotModal').modal('hide')
       }
     }
 })

@@ -39,8 +39,8 @@ input{
           <h5>Do you want to name this list of words "<span id="slotname_span"></span>"? If not please, please change the name to a word of your choice?</h5>
           <input type="text" class="form-control" id="slotname" style="border: 1px solid #ddd !important; margin-bottom: 15px;">
           <div>
-              <button id="slotname_submit" type="button" class="btn btn-primary mr-4" style="color: white">Submit</button>
-              <button id="slotname_cancel" type="button" class="btn btn-secondary" style="">Cancel</button>
+              <button type="button" class="btn btn-primary mr-4" style="color: white" @click="submitSlots">Submit</button>
+              <button type="button" class="btn btn-secondary" style="" @click="cancelSlots">Cancel</button>
           </div>
         </div>
       </div>
@@ -121,7 +121,7 @@ input{
             <h5 class="me-3 mb-0 text-white">Register Similar Words :</h5>
             <div class="d-flex align-items-center" style="width: 400px;">
                 <input type="file" class="form-control me-2" name="similar_words" id="similar_words" @change="changeSimilarWords">
-                <button id="submit_words" class="btn btn-outline-light rounded-3" type="button" @click="sendSimilarWords">Send</button>
+                <button id="submit_words" class="btn btn-outline-light rounded-3" type="button" @click="sendSlotsName">Send</button>
             </div>
             <button class="btn btn-outline-light rounded-circle ms-2 text-bold"
               style="width: 34px; height: 34px; background: transparent; border:1px solid #fff; border-radius: 9999px; color: white;" 
