@@ -36,8 +36,8 @@ input{
     <div id="slotModal" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
       <div class="modal-dialog" style="margin-top: 150px">
         <div class="modal-content" style="padding:15px">
-          <h5>Do you want to name this list of words "<span id="slotname_span"></span>"? If not please, please change the name to a word of your choice?</h5>
-          <input type="text" class="form-control" id="slotname" style="border: 1px solid #ddd !important; margin-bottom: 15px;">
+          <h5>Do you want to name this list of words "<span>{{slotname}}</span>"? If not please, please change the name to a word of your choice?</h5>
+          <input type="text" class="form-control" v-model="slotname" style="border: 1px solid #ddd !important; margin-bottom: 15px;">
           <div>
               <button type="button" class="btn btn-primary mr-4" style="color: white" @click="submitSlots">Submit</button>
               <button type="button" class="btn btn-secondary" style="" @click="cancelSlots">Cancel</button>
@@ -259,10 +259,11 @@ input{
                 <the-card-case :content="i.content" :active="i.active" :box-id="card.id" :case-id="index">
                 </the-card-case>
             </div>
-
             <div
-              v-if="card.doc"
+              v-if="card.doc && card.doc.data"
               style="
+                display: flex;
+                justify-content: space-between;
                 height: 70px;
                 margin: 3px 0;
                 border: 1px solid white;
@@ -271,7 +272,24 @@ input{
                 background-repeat: no-repeat;
                 background-position: center center;"
               :style="'background-image: url(\'' + card.doc + '\');'"
-            ></div>
+            >
+              <span></span>
+              <span>×</span>
+            </div>
+            <div
+              v-else-if="card.doc && card.doc.doc_name"
+              style="
+                display: flex;
+                justify-content: space-between;
+                border: 1px solid white;
+                background: black;
+                color: white;
+                padding: 0.25rem;
+              "
+            >
+              <span>{{ card.doc.doc_name }}</span>
+              <span>×</span>
+            </div>
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
                     <div v-if="card.next && isLast">

@@ -76,13 +76,6 @@ $(function(){
             timeout: 300000
         });
   })
-  
-  jQuery('#slotname_cancel').click(function(){
-    jQuery('#slotModal').modal('hide')
-  })
-
-  var slots = {}
-
 })
 
 var url = 'https://easydialog.org/wp-admin/admin-ajax.php'
@@ -110,7 +103,7 @@ const store = new Vuex.Store({
                 _loop.next = next
                 let doc = state.docs.find( i => i.caseid == _loop.id)
                 if(doc){
-                  _loop.doc = doc.data
+                  _loop.doc = doc
                 }
                 cards.push(_loop)
                 if(!next || !getters.getBox(next)) break;
@@ -385,7 +378,7 @@ const store = new Vuex.Store({
           state.boxes = boxes
         },
         setDocs(state, docs){
-          state.boxes = docs
+          state.docs = docs
         },
         setScripts(state, scripts){
           state.scripts = scripts
@@ -966,7 +959,9 @@ const vm = new Vue({
             isChanged: false,
             isBuilt: false,
             isSaved: true,
-            slots: {}
+            slotFileName: '',
+            slotname: '',
+            slot_data: {}
         }
     },
     computed: {
@@ -1039,7 +1034,7 @@ const vm = new Vue({
             data:{
               action:'get_bot_key',
               param:{
-                  user_id: browser + ip
+                "user_id": browser + ip
               }
             },
             dataType: 'json',
@@ -1072,10 +1067,8 @@ const vm = new Vue({
                 url: url,
                 xhrFields: { withCredentials: true},
                 data:{
-                  action: 'build_bot_dev',  // 'build_bot_dev'
+                  action: 'build_bot_async',  // 'build_bot_dev'
                   param:{
-                    key: "InvocationType",
-                    value: "Event",
                     data:{
                       boxes: this.$store.state.boxes,
                       scripts: this.$store.state.scripts,
@@ -1092,19 +1085,19 @@ const vm = new Vue({
                   
                   isBuild = true
                   isChange = false
-                  if(response.password && response.password.en){
-                    vm.botKey = response.password.en; // .de  .fr  .ja
-                  }else{
-                    // vm.botKey = 'No Bot Key be returned'
+
+                  if(!response){
                     this.getKey();
                     alert('Bot is being built in the background. This might take a few minutes.  Once the bot is completed, you can use it using the botkey displayed in the upper left corner of this site')
+                  }else if(response.password && response.password.en){
+                    vm.botKey = response.password.en; // .de  .fr  .ja
+                    if(response.message){
+                      alert(response.message)
+                    }else{
+                      alert("The bot is still being built in the background. You should be able to use in about 1 minute.")
+                    }
                   }
 
-                  if(response.message){
-                    alert(response.message)
-                  }else{
-                    alert("The bot is still being built in the background. You should be able to use in about 1 minute.")
-                  }
                 },
                 error: function(){
                     vm.waiting = false
@@ -1288,17 +1281,14 @@ const vm = new Vue({
         const reader = new FileReader();
         
         reader.onload = (e) => {
-          this.slots = {
-            'slots_file_name': filename,
-            'slots_data': e.target.result,
-            user_id: browser + ip
-          }
+            this.slots_file_name = filename;
+            this.slot_data = e.target.result;
         };
         
         reader.readAsText(event.target.files[0]);
       },
       sendSlotsName(){
-        if(!this.slots.slots_file_name){
+        if(!this.slots_file_name){
           alert('Choose the file.');
           return;
         }
@@ -1310,8 +1300,10 @@ const vm = new Vue({
           data:{
             action:'save_bot_dev',
             param:{
-                slots_file_name: this.slots.slots_file_name,
-                user_id: browser + ip,
+                slots: {
+                  slots_file_name: this.slots_file_name,
+                  user_id: browser + ip,
+                },
             }
           },
     
@@ -1320,9 +1312,8 @@ const vm = new Vue({
           success: function(response) {
             vm.waiting = false
             if(response.slotname){
+              vm.slotname = response.slotname
               jQuery('#slotModal').modal('show')
-              jQuery('#slotname').val(response.slotname)
-              jQuery('#slotname_span').text(response.slotname)
             }else{
               alert(response)
             }
@@ -1334,12 +1325,14 @@ const vm = new Vue({
         });
       },
       submitSlots(){
+        // jQuery('#slotModal').modal('hide')
+        // slots.slotname = jQuery('#slotname').val()
+        // if(!/^[a-zA-Z0-9-_]+$/.test(slots.slotname)){
+        //   alert('Correct File Name')
+        //   return false
+        // }
         jQuery('#slotModal').modal('hide')
-        slots.slotname = jQuery('#slotname').val()
-        if(!/^[a-zA-Z0-9-_]+$/.test(slots.slotname)){
-          alert('Correct File Name')
-          return false
-        }
+        this.waiting = true
         jQuery.ajax({
             type: 'POST',
             url: url,
@@ -1350,20 +1343,17 @@ const vm = new Vue({
             data:{
               action:'save_bot_dev',
               param:{
-                  slots,
-                  user_id: browser + ip
+                  slots: {
+                    slotname: this.slotname,
+                    slots_data: this.slot_data,
+                    user_id: browser + ip
+                  },
               }
             },
-  
-            // dataType: 'json',
-  
-            beforeSend: function() {
-                jQuery("#overlay").fadeIn(300);
-            },
             success: function(response) {
-                jQuery("#overlay").fadeOut(300, function(){
-                    alert(response.message)
-                });
+              vm.waiting = false
+              
+              alert(response.message)
             },
             error: function(){
                 jQuery("#overlay").fadeOut(300, function(){

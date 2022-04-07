@@ -78,7 +78,7 @@ function wp9838c_timeout_extend( $time )
     return 10;
 }
 
-function myCurl($url){
+function myCurl($url, $header = []){
     if (isset($_POST['param']) && is_array($_POST['param'])) {    
         $param = wp_json_encode($_POST['param']);
                    
@@ -86,7 +86,7 @@ function myCurl($url){
                 'timeout' => 120,
                 'redirection' => 5,
                 'blocking' => true,
-                //'headers'   => array('Content-Type' => 'application/json; charset=utf-8'),
+                'headers'   => $header,
                 'body' => $param,
             )
         );
@@ -198,39 +198,16 @@ add_action( 'wp_ajax_nopriv_build_bot_dev', 'ajax_func_dev' );
 
 
 function ajax_func_dev() {
-    $url = 'https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/LambdaBackendStaging';
-
-	if (isset($_POST['param']) && is_array($_POST['param'])) {    
-      	$param = wp_json_encode($_POST['param']);
-                     
-        $result = wp_remote_post( $url, array(
-                'timeout' => 120,
-                'redirection' => 5,
-                'blocking' => true,
-                 //'headers'   => array('Content-Type' => 'application/json; charset=utf-8'),
-                'body' => $param,
-            )
-        );
-
-        if ( is_wp_error( $result ) ) {
-            $error_message = $result->get_error_message();
-            echo "Wordpress Error: $error_message";
-            wp_die();
-        } else {
-            $body = wp_remote_retrieve_body( $result);
-            $data = json_decode($body);
-            wp_send_json($data);
-        }
-    }
+    myCurl('https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/LambdaBackendStaging');
 }
 
 
 // Build Bot Async
-add_action( 'wp_ajax_built_bot_async', 'buildBotAsync' );
-add_action( 'wp_ajax_nopriv_built_bot_async', 'buildBotAsync' );
+add_action( 'wp_ajax_build_bot_async', 'buildBotAsync' );
+add_action( 'wp_ajax_nopriv_build_bot_async', 'buildBotAsync' );
 
 function buildBotAsync() {
-    myCurl('https://1zjllk6s06.execute-api.us-east-1.amazonaws.com/test/async');
+    myCurl('https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/async', ["InvocationType" => "Event"]);
 }
 
 // Get Bot Key
@@ -238,7 +215,7 @@ add_action( 'wp_ajax_get_bot_key', 'getBotKey' );
 add_action( 'wp_ajax_nopriv_get_bot_key', 'getBotKey' );
 
 function getBotKey() {
-    myCurl('https://a8e5l6o832.execute-api.us-east-1.amazonaws.com/test/chkbk');
+    myCurl('https://1zjllk6s06.execute-api.us-east-1.amazonaws.com/test/chkbk');
 }
 
 
