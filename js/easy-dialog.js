@@ -35,49 +35,6 @@ jQuery.getJSON("https://api.ipify.org?format=json", function(data) {
   }
 });
 
-$(function(){
-  jQuery('#slotname_submit').click(function(){
-    jQuery('#slotModal').modal('hide')
-    slots.slotname = jQuery('#slotname').val()
-    if(!/^[a-zA-Z0-9-_]+$/.test(slots.slotname)){
-      alert('Correct File Name')
-      return false
-    }
-    jQuery.ajax({
-            type: 'POST',
-            url: url,
-            xhrFields: {
-                withCredentials: true
-            },
-  
-            data:{
-              action:'save_bot_dev',
-              param:{
-                  slots,
-                  user_id: browser + ip
-              }
-            },
-  
-            // dataType: 'json',
-  
-            beforeSend: function() {
-                jQuery("#overlay").fadeIn(300);
-            },
-            success: function(response) {
-                jQuery("#overlay").fadeOut(300, function(){
-                    alert(response.message)
-                });
-            },
-            error: function(){
-                jQuery("#overlay").fadeOut(300, function(){
-                    alert("Error");
-                });
-            },
-            timeout: 300000
-        });
-  })
-})
-
 var url = 'https://easydialog.org/wp-admin/admin-ajax.php'
 
 const store = new Vuex.Store({
@@ -301,6 +258,9 @@ const store = new Vuex.Store({
             commit('pushDoc', {boxId, data, doc_name})
           }
         },
+        removeDoc({commit, getters}, {caseid}){
+          commit('removeDoc', {caseid})
+        },
         setScriptOfBox({state, commit, getters}, {boxId, data, script_name}){
           let script = state.scripts.find( i => i.caseid == boxId)
           if(script){
@@ -434,6 +394,9 @@ const store = new Vuex.Store({
             data,
             doc_name
           })
+        },
+        removeDoc(state, {caseid}){
+          state.docs = state.docs.filter(doc => doc.caseid != caseid)
         },
         changeScript(state, {script, data, script_name}){
           script.data = data;
@@ -590,6 +553,11 @@ Vue.component('card-as', {
           })
         })
       },
+      removeDoc(){
+        this.$store.dispatch('removeDoc', {
+          caseid: this.card.id
+        })
+      }
     }
 })
 
@@ -878,8 +846,8 @@ Vue.component('new-image-btn', {
     },
     updateImage(e){
       console.log('hi')
-      if(e.target.files[0].size > 1000000){
-          alert('File Size should smaller than 1M')
+      if(e.target.files[0].size > 40000){
+          alert('File Size should smaller than 40K')
           return false;
       }
 
@@ -914,8 +882,8 @@ Vue.component('new-script-btn', {
     },
     updateImage(e){
       console.log('hi')
-      if(e.target.files[0].size > 100000){
-          alert('File Size should smaller than 100KB')
+      if(e.target.files[0].size > 40000){
+          alert('File Size should smaller than 40KB')
           return false;
       }
 

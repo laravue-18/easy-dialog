@@ -266,15 +266,17 @@ input{
                 justify-content: space-between;
                 height: 70px;
                 margin: 3px 0;
+                color: white;
                 border: 1px solid white;
                 background: black;
                 background-size: contain;
                 background-repeat: no-repeat;
-                background-position: center center;"
-              :style="'background-image: url(\'' + card.doc + '\');'"
+                background-position: center center;
+                padding: 0 0.25rem"
+              :style="'background-image: url(\'' + card.doc.data + '\');'"
             >
               <span></span>
-              <span>×</span>
+              <span style="cursor: pointer;" @click="removeDoc">×</span>
             </div>
             <div
               v-else-if="card.doc && card.doc.doc_name"
@@ -288,7 +290,7 @@ input{
               "
             >
               <span>{{ card.doc.doc_name }}</span>
-              <span>×</span>
+              <span style="cursor: pointer;" @click="removeDoc">×</span>
             </div>
             <div class="d-md-flex justify-content-end align-items-center mt-2">
                 <div class="">
