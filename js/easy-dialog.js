@@ -419,8 +419,8 @@ const store = new Vuex.Store({
           obj[main].push(sub)
           state.ad = {...obj}
         },
-        changeCasesOfBox(state, {value, box}){
-          box.cases = value
+        changeCasesOfBox(state, {cases, box}){
+          box.cases = cases
         }
     }
 });
