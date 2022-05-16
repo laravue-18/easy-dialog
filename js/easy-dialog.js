@@ -151,6 +151,10 @@ const store = new Vuex.Store({
             commit('setActiveCase', {boxId: id, caseIndex: box.cases.length})
             commit('pushCaseToBox', {box, content})
         },
+        addNewVariant({state, commit, getters, dispatch}, {id, index, val}){
+            let box = getters.getBox(id)
+            commit('pushVariantToCase', {box, index, val})
+        },
         removeCaseFromBox({state, commit, getters, dispatch}, {boxId, caseIndex}){
           let box = getters.getBox(boxId)
           let next = box.cases[caseIndex].next
@@ -210,7 +214,11 @@ const store = new Vuex.Store({
         },
         addNewBox({state, commit, getters, dispatch}, {action, val, select = false}){
           let id = getters.getNewBoxId
-          content = (action == 'ad') ? [val, val] : val
+          content = null
+          if(action == 'hs') content = [val];
+          if(action == 'as') content = val;
+          if(action == 'ad') content = [val, val];
+
           if(state.newStepPosition == 1){
             commit('pushBox', {
               id: 1,
@@ -355,6 +363,9 @@ const store = new Vuex.Store({
               next: 0
             })
         },
+        pushVariantToCase(state, {box, index, val}){
+            box.cases[index].content.push(val)
+        },
         changeCase(state, {caseItem, content}){
             caseItem.content = content
         },
@@ -473,7 +484,9 @@ Vue.component('card-hs', {
     data(){
       return {
         next: '',
-        drag: false
+        drag: false,
+        drawer: {},
+        newVariant: ''
       }
     },
     computed: {
@@ -491,7 +504,7 @@ Vue.component('card-hs', {
     },
     methods: {
         addCaseToCard(id, event){
-            this.$store.dispatch('addCaseToBox',{id, content:event.target.value})
+            this.$store.dispatch('addCaseToBox',{id, content:[event.target.value]})
             event.target.value = ''
         },
         setNext(){
@@ -520,6 +533,13 @@ Vue.component('card-hs', {
           // return (
           //   (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
           // );
+        },
+        addNewVariant(e, id, index){
+          if(e.target.value){
+            this.$store.dispatch('addNewVariant',{val:e.target.value, index, id})
+            e.target.value = ''
+            this.newVariant = ''
+          }
         }
     }
 })
@@ -929,7 +949,8 @@ const vm = new Vue({
             isSaved: true,
             slotFileName: '',
             slotname: '',
-            slot_data: {}
+            slot_data: {},
+            drawer: true
         }
     },
     computed: {

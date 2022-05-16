@@ -7,6 +7,7 @@
     <title>easyDialog</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/vue-json-pretty.min.css">
+    <link rel="stylesheet" href="css/iview.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 
     <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
@@ -36,6 +37,7 @@
 
     <!-- Load the following for BootstrapVueIcons support -->
     <script src="js/bootstrap-vue-icons.min.js"></script>
+    <script src="js/iview.min.js"></script>
 
     <script src="js/easy-dialog.js"></script>
 </body>

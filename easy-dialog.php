@@ -46,7 +46,6 @@ input{
       </div>
     </div>
 
-
     <div v-if="!loading" class="container">
       <div v-if="isAuthorized">
         <div class="row py-3">
@@ -196,12 +195,20 @@ input{
                 </template>
             </div>
           </div>
-              <draggable class="row" v-model="cases" @start="drag=true" @end="drag=false" :move="onMove">
-                <div v-for="(i, index) in cases" class="col-md-6" :key="index">
-                    <the-card-case :content="i.content" :active="i.active" :action="card.action" :box-id="card.id" :case-id="index" :casesLength="card.cases.length">
-                    </the-card-case>
-                </div>
-              </draggable>
+          <draggable class="row" v-model="cases" @start="drag=true" @end="drag=false" :move="onMove">
+            <div v-for="(i, index) in cases" class="col-md-6" :key="index">
+              <div @click="$set(drawer, index, true)">
+                <the-card-case :content="i.content[0]" :active="i.active" :action="card.action" :box-id="card.id" :case-id="index" :casesLength="card.cases.length">
+                </the-card-case>
+              </div>
+              <Drawer title="Variants" :closable="false" v-model="drawer[index]">
+                  <template v-for="j in i.content">
+                    <Input :value="j" class="border my-1"/>
+                  </template>
+                  <Input placeholder="Add New Variant" class="border my-1" v-model="newVariant" @on-enter="addNewVariant($event, card.id, index)"/>
+              </Drawer>
+            </div>
+          </draggable>
           <input class="form-control form-control-sm" type="text" placeholder="Add New ..."
               @change="addCaseToCard(card.id, $event)"
           >
