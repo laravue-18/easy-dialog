@@ -202,8 +202,8 @@ input{
                 </the-card-case>
               </div>
               <Drawer title="Variants" :closable="false" v-model="drawer[index]">
-                  <template v-for="j in i.content">
-                    <Input :value="j" class="border my-1"/>
+                  <template v-for="(j, k2) in i.content">
+                    <Input :value="j" class="border my-1" @on-change="updateVariant($event, card.id, index, k2)"/>
                   </template>
                   <Input placeholder="Add New Variant" class="border my-1" v-model="newVariant" @on-enter="addNewVariant($event, card.id, index)"/>
               </Drawer>

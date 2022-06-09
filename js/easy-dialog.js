@@ -152,8 +152,11 @@ const store = new Vuex.Store({
             commit('pushCaseToBox', {box, content})
         },
         addNewVariant({state, commit, getters, dispatch}, {id, index, val}){
-            let box = getters.getBox(id)
-            commit('pushVariantToCase', {box, index, val})
+            commit('pushVariantToCase', {id, index, val})
+        },
+        updateVariant({state, commit, getters, dispatch}, {k1, k2, id, val}){
+            // let box = getters.getBox(id)
+            commit('updateVariantOfCase', {id, k1, k2, val})
         },
         removeCaseFromBox({state, commit, getters, dispatch}, {boxId, caseIndex}){
           let box = getters.getBox(boxId)
@@ -363,8 +366,13 @@ const store = new Vuex.Store({
               next: 0
             })
         },
-        pushVariantToCase(state, {box, index, val}){
-            box.cases[index].content.push(val)
+        pushVariantToCase(state, {id, index, val}){
+          state.boxes.find(i => i.id == id).cases[index].content.push(val)
+            Vue.set(state, 'boxes', [...state.boxes])
+        },
+        updateVariantOfCase(state, {id, k1, k2, val}){
+            state.boxes.find(i => i.id == id).cases[k1].content[k2] = val
+            Vue.set(state, 'boxes', [...state.boxes])
         },
         changeCase(state, {caseItem, content}){
             caseItem.content = content
@@ -539,6 +547,11 @@ Vue.component('card-hs', {
             this.$store.dispatch('addNewVariant',{val:e.target.value, index, id})
             e.target.value = ''
             this.newVariant = ''
+          }
+        },
+        updateVariant(e, id, k1, k2){
+          if(e.target.value){
+            this.$store.dispatch('updateVariant', {val: e.target.value, id, k1, k2})
           }
         }
     }
