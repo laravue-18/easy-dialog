@@ -155,8 +155,10 @@ const store = new Vuex.Store({
             commit('pushVariantToCase', {id, index, val})
         },
         updateVariant({state, commit, getters, dispatch}, {k1, k2, id, val}){
-            // let box = getters.getBox(id)
             commit('updateVariantOfCase', {id, k1, k2, val})
+        },
+        deleteVariant({state, commit, getters, dispatch}, {k1, k2, id}){
+            commit('deleteVariantOfCase', {id, k1, k2})
         },
         removeCaseFromBox({state, commit, getters, dispatch}, {boxId, caseIndex}){
           let box = getters.getBox(boxId)
@@ -370,6 +372,10 @@ const store = new Vuex.Store({
           state.boxes.find(i => i.id == id).cases[index].content.push(val)
             Vue.set(state, 'boxes', [...state.boxes])
         },
+        deleteVariantOfCase(state, {id, k1, k2, val}){
+            state.boxes.find(i => i.id == id).cases[k1].content.splice(k2, 1)
+            Vue.set(state, 'boxes', [...state.boxes])
+        },
         updateVariantOfCase(state, {id, k1, k2, val}){
             state.boxes.find(i => i.id == id).cases[k1].content[k2] = val
             Vue.set(state, 'boxes', [...state.boxes])
@@ -552,6 +558,8 @@ Vue.component('card-hs', {
         updateVariant(e, id, k1, k2){
           if(e.target.value){
             this.$store.dispatch('updateVariant', {val: e.target.value, id, k1, k2})
+          }else{
+            this.$store.dispatch('deleteVariant', {id, k1, k2})
           }
         }
     }

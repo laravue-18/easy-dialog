@@ -203,9 +203,11 @@ input{
               </div>
               <Drawer title="Variants" :closable="false" v-model="drawer[index]">
                   <template v-for="(j, k2) in i.content">
-                    <Input :value="j" class="border my-1" @on-change="updateVariant($event, card.id, index, k2)"/>
+                    <Input :value="j" class="border my-1" @on-change="updateVariant($event, card.id, index, k2)" :clearable="k2 ? true : false"/>
                   </template>
-                  <Input placeholder="Add New Variant" class="border my-1" v-model="newVariant" @on-enter="addNewVariant($event, card.id, index)"/>
+                  <template v-if="i.content.length < 5">
+                    <Input placeholder="Add New Variant" class="border my-1" v-model="newVariant" @on-enter="addNewVariant($event, card.id, index)"/>
+                  </template>
               </Drawer>
             </div>
           </draggable>

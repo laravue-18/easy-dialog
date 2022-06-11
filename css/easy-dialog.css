@@ -71,3 +71,7 @@ body{
 .swal-button--cancel{
     background: lightgrey;
 }
+
+.ivu-icon-ios-close-circle:before {
+    content: "×";
+}
