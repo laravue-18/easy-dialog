@@ -287,7 +287,15 @@ const store = new Vuex.Store({
             data.docs && commit('setDocs', data.docs)
             data.scripts && commit('setScripts', data.scripts)
             data.ad && commit('setAd', data.ad)
-            commit('setBoxes', data.boxes)
+            let boxes = lodash.cloneDeep(data.boxes)
+            boxes.forEach(i => {
+              if(i.action == 'hs'){
+                if(typeof i.cases[0].content === 'string'){
+                  i.cases.forEach(j => j.content = [j.content])
+                }
+              }
+            })
+            commit('setBoxes', boxes)
         },
 
         addAdSubToBox({state, commit, getters, dispatch}, {boxId, main, sub}){
@@ -335,7 +343,7 @@ const store = new Vuex.Store({
             caseIndex
           })
           commit('changeCasesOfBox', {
-            value: value.map(i => {
+            cases: value.map(i => {
               delete i.active;
               return i
             }),
@@ -382,9 +390,6 @@ const store = new Vuex.Store({
         },
         changeCase(state, {caseItem, content}){
             caseItem.content = content
-        },
-        changeCasesOfBox(state, {value, box}){
-          box.cases = value
         },
         deleteCaseFromBox(state, {box, caseIndex}){
             box.cases.splice(caseIndex, 1);
@@ -542,11 +547,12 @@ Vue.component('card-hs', {
           })
         },
         onMove({ relatedContext, draggedContext }) {
+          // debugger
           const relatedElement = relatedContext.element;
           const draggedElement = draggedContext.element;
-          // return (
-          //   (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
-          // );
+          return (
+            (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
+          );
         },
         addNewVariant(e, id, index){
           if(e.target.value){
@@ -559,7 +565,15 @@ Vue.component('card-hs', {
           if(e.target.value){
             this.$store.dispatch('updateVariant', {val: e.target.value, id, k1, k2})
           }else{
-            this.$store.dispatch('deleteVariant', {id, k1, k2})
+            if(k2){
+              this.$store.dispatch('deleteVariant', {id, k1, k2})
+            }else{
+              this.$Message.warning({
+                top: 50,
+                content: 'This field is required, please add some text here.',
+                duration: 4
+              })
+            }
           }
         }
     }

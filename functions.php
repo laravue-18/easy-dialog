@@ -153,8 +153,40 @@ function blah_do_ajax_hello() {
 
 
 function blah_do_ajax_chatbot() {
+    $url = '';
+    // if (filter_var($ip, FILTER_VALIDATE_IP) === FALSE) {
+    //     $ip = $_SERVER["REMOTE_ADDR"];
+    //     if ($deep_detect) {
+    //         if (filter_var(@$_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP))
+    //             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    //         if (filter_var(@$_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP))
+    //             $ip = $_SERVER['HTTP_CLIENT_IP'];
+    //     }
+    // }
 
-	$url = 'https://t7m43auwfh.execute-api.us-east-1.amazonaws.com/test/DCSmulti';
+    // $continents = array(
+    //     "AF" => "Africa",
+    //     "AN" => "Antarctica",
+    //     "AS" => "Asia",
+    //     "EU" => "Europe",
+    //     "OC" => "Australia (Oceania)",
+    //     "NA" => "North America",
+    //     "SA" => "South America"
+    // );
+    
+    // if (filter_var($ip, FILTER_VALIDATE_IP) && in_array($purpose, $support)) {
+    //     $ipdat = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=" . $ip));
+    //     wp_die($ipdat->geoplugin_continentCode);
+    // }
+    $ipdat = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=" . $_SERVER["REMOTE_ADDR"]));
+
+    if($ipdat->geoplugin_countryName == 'Japan' || $ipdat->geoplugin_countryName == 'Korea'){
+        $url = 'https://vkrvv0umyf.execute-api.ap-northeast-1.amazonaws.com/test/DCSmulti';
+    }else if($ipdat->geoplugin_countryName == 'Germany'){
+        $url = 'https://mg6xns58a1.execute-api.eu-central-1.amazonaws.com/test/DCSmulti';
+    }else{
+        $url = 'https://t7m43auwfh.execute-api.us-east-1.amazonaws.com/test/DCSmulti';
+    }
 
 	if (isset($_POST) && is_array($_POST)) {
     	$param = $_POST;
