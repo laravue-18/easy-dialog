@@ -198,13 +198,14 @@ input{
           <draggable class="row" v-model="cases" @start="drag=true" @end="drag=false" :move="onMove">
             <div v-for="(i, index) in cases" class="col-md-6" :key="index">
               <div @click="$set(drawer, index, true)">
-                <the-card-case :content="i.content[0]" :active="i.active" :action="card.action" :box-id="card.id" :case-id="index" :casesLength="card.cases.length">
+                <the-card-case :content="i.content[0].replace(' 01ny01', '')" :active="i.active" :action="card.action" :box-id="card.id" :case-id="index" :casesLength="card.cases.length">
                 </the-card-case>
               </div>
               <Drawer title="Variants" :closable="false" v-model="drawer[index]">
-                  <template v-for="(j, k2) in i.content">
-                    <Input :value="j" class="border my-1" @on-change="updateVariant($event, card.id, index, k2)" :clearable="k2 ? true : false"/>
-                  </template>
+                  <div v-for="(j, k2) in i.content">
+                    <Input :value="j.replace(' 01ny01', '')" class="border my-1" @on-change="updateVariant($event, card.id, index, k2)" :clearable="k2 ? true : false"/>
+                    <Checkbox v-if='k2==0' :value="j.includes('01ny01', '')" @click.prevent.native='handleQuickLabelClick(card.id, index)'>Set as Quick Reply Label</Checkbox>
+                  </div>
                   <template v-if="i.content.length < 5">
                     <Input placeholder="Add New Variant" class="border my-1" v-model="newVariant" @on-enter="addNewVariant($event, card.id, index)"/>
                   </template>

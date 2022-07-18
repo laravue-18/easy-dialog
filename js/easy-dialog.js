@@ -376,6 +376,11 @@ const store = new Vuex.Store({
               next: 0
             })
         },
+        setQuickVariant(state, {id, index}){
+          let str = state.boxes.find(i => i.id === id).cases[index].content[0]
+          state.boxes.find(i => i.id === id).cases[index].content[0] = str.includes('01ny01') ? str.replace(' 01ny01', '') : str + ' 01ny01'
+          Vue.set(state, 'boxes', [...state.boxes])
+        },
         pushVariantToCase(state, {id, index, val}){
           state.boxes.find(i => i.id == id).cases[index].content.push(val)
             Vue.set(state, 'boxes', [...state.boxes])
@@ -385,7 +390,11 @@ const store = new Vuex.Store({
             Vue.set(state, 'boxes', [...state.boxes])
         },
         updateVariantOfCase(state, {id, k1, k2, val}){
+          if(state.boxes.find(i => i.id == id).cases[k1].content[k2].includes('01ny01')){
+            state.boxes.find(i => i.id == id).cases[k1].content[k2] = val + ' 01ny01'
+          }else{
             state.boxes.find(i => i.id == id).cases[k1].content[k2] = val
+          }
             Vue.set(state, 'boxes', [...state.boxes])
         },
         changeCase(state, {caseItem, content}){
@@ -575,6 +584,9 @@ Vue.component('card-hs', {
               })
             }
           }
+        },
+        handleQuickLabelClick(id, index){
+          this.$store.commit('setQuickVariant', {index, id})
         }
     }
 })
@@ -1123,7 +1135,7 @@ const vm = new Vue({
                   }
 
                 },
-                error: function(){
+                error: () => {
                     vm.waiting = false
                     alert("Building Bots is not possible right now, please try again later");
                     isBuild = true
@@ -1207,7 +1219,7 @@ const vm = new Vue({
           return true;
         }
 
-        jQuery.ajax({
+        var request = jQuery.ajax({
             type: 'POST',
             url: url,
             xhrFields: {
@@ -1246,11 +1258,15 @@ const vm = new Vue({
                 */
                 alert(response.message);
             },
-            error: function(err){
-                this.waiting = false
+            error: (err) => {
+                vm.waiting = false
                 alert("Failure!");
             },
             timeout: 30000
+        });
+
+        request.fail(function( jqXHR, textStatus ) {
+          alert( "Request failed: " + textStatus );
         });
 
       },
